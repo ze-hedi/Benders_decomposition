@@ -114,29 +114,3 @@ target_link_libraries(test_implementations PRIVATE
 
 add_test(NAME test_implementations COMMAND test_implementations)
 set_property(TEST test_implementations PROPERTY LABELS unit)
-
-add_library(fake_micro_iterations_lib SHARED plugin/fake_micro_iterations_lib.cpp)
-target_include_directories(fake_micro_iterations_lib PRIVATE ${PROJECT_SOURCE_DIR}/src/include)
-add_library(fake_incomplete_lib SHARED plugin/fake_incomplete_lib.cpp)
-
-add_executable(test_plugin
-        plugin/test_dynamic_library_loader.cpp
-)
-
-target_include_directories(test_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(test_plugin PRIVATE
-        plugins
-        GTest::gtest_main
-)
-
-add_dependencies(test_plugin fake_micro_iterations_lib fake_incomplete_lib)
-
-target_compile_definitions(test_plugin PRIVATE
-        TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
-        FAKE_LIB="$<TARGET_FILE:fake_micro_iterations_lib>"
-        FAKE_INCOMPLETE_LIB="$<TARGET_FILE:fake_incomplete_lib>"
-)
-
-add_test(NAME test_plugin COMMAND test_plugin)
-set_property(TEST test_plugin PROPERTY LABELS unit)

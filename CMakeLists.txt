@@ -20,6 +20,9 @@ FetchContent_Declare(jsoncpp
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(jsoncpp)
 
+add_library(interfaces INTERFACE)
+target_include_directories(interfaces INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+
 add_library(linear_solvers src/solvers/LinearSolvers.cpp)
 target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)

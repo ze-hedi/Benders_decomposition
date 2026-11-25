@@ -33,3 +33,15 @@ target_compile_definitions(test_workers PRIVATE
 
 add_test(NAME test_workers COMMAND test_workers)
 set_property(TEST test_workers PROPERTY LABELS unit)
+
+add_executable(test_interfaces
+        interfaces/test_interfaces.cpp
+)
+
+target_link_libraries(test_interfaces PRIVATE
+        interfaces
+        GTest::gtest_main
+)
+
+add_test(NAME test_interfaces COMMAND test_interfaces)
+set_property(TEST test_interfaces PROPERTY LABELS unit)

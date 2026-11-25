@@ -71,7 +71,8 @@ target_link_libraries(implementations PUBLIC benders_managers logger output)
 
 add_library(plugins
     src/plugin/NoOperationPlugin.cpp
-    src/plugin/DynamicLibraryLoader.cpp)
+    src/plugin/DynamicLibraryLoader.cpp
+    src/plugin/BendersMicroIterations.cpp)
 target_link_libraries(plugins PUBLIC benders_managers ${CMAKE_DL_LIBS})
 
 add_executable(mathopt_smoke src/main.cpp)

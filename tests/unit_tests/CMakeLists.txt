@@ -121,6 +121,7 @@ add_library(fake_incomplete_lib SHARED plugin/fake_incomplete_lib.cpp)
 
 add_executable(test_plugin
         plugin/test_dynamic_library_loader.cpp
+        plugin/test_benders_micro_iterations.cpp
 )
 
 target_include_directories(test_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

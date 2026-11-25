@@ -99,3 +99,17 @@ target_link_libraries(test_logger PRIVATE
 
 add_test(NAME test_logger COMMAND test_logger)
 set_property(TEST test_logger PROPERTY LABELS unit)
+
+add_executable(test_implementations
+        implementations/test_benders_base.cpp
+)
+
+target_include_directories(test_implementations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(test_implementations PRIVATE
+        implementations
+        GTest::gtest_main
+)
+
+add_test(NAME test_implementations COMMAND test_implementations)
+set_property(TEST test_implementations PROPERTY LABELS unit)

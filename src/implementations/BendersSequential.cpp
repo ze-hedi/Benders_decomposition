@@ -1,0 +1,184 @@
+#include "implementations/BendersSequential.h"
+
+#include <utility>
+
+#include "implementations/SequentialCommunicationStrategy.h"
+#include "utilities/helpers/Timer.h"
+
+BendersSequential::BendersSequential(const BendersBaseOptions& options,
+                                     Logger logger,
+                                     std::shared_ptr<Output::OutputWriter> writer,
+                                     std::shared_ptr<MathLoggerDriver> mathLoggerDriver):
+    BendersBase(options,
+                std::move(logger),
+                std::move(writer),
+                std::move(mathLoggerDriver),
+                std::make_shared<SequentialCommunicationStrategy>()),
+    cuts_manager_(std::make_unique<BendersCutsManagerSequential>(_data,
+                                                                 _problem_to_id,
+                                                                 relevantIterationData_,
+                                                                 master_manager_))
+{
+    // The log file is only known after construction (set_solver_log_file), so the subproblems
+    // manager is built in InitializeProblems()
+}
+
+void BendersSequential::InitializeProblems()
+{
+    subproblems_manager_ = std::make_unique<BendersSubProblemsManagerSequential>(
+      _data,
+      _options,
+      output_manager_.GetLogger(),
+      solver_log_file_,
+      output_manager_.GetWriter(),
+      coupling_map_);
+    subproblems_manager_->MatchProblemToId();
+    _problem_to_id = subproblems_manager_->GetProblemToId();
+
+    std::vector<SubProblemNamesInCut> subproblem_per_cut_indices;
+
+    const bool has_subproblems = _data.control.nsubproblem > 0; // aggregation divides by it
+    if (has_subproblems) [[likely]]
+    {
+        int n_cuts = SetAggregation(_data.control.nsubproblem);
+        subproblem_per_cut_indices.reserve(n_cuts);
+
+        SubProblemNamesInCut current_cut;
+        size_t group_size = (_data.control.nsubproblem + n_cuts - 1) / n_cuts;
+        current_cut.reserve(group_size);
+
+        for (const auto& [name, id]: _problem_to_id)
+        {
+            current_cut.emplace_back(name, 0);
+            if (current_cut.size() == group_size)
+            {
+                subproblem_per_cut_indices.emplace_back(std::move(current_cut));
+                current_cut.clear();
+                current_cut.reserve(group_size);
+            }
+        }
+        if (!current_cut.empty())
+        {
+            subproblem_per_cut_indices.emplace_back(std::move(current_cut));
+        }
+    }
+
+    InitializeMasterProblem();
+
+    cuts_manager_->SetSubproblemPerCutIndices(std::move(subproblem_per_cut_indices));
+
+    // With PER_SUB, workers are re-created from disk at each iteration: loading them all here
+    // would defeat the cache
+    if (_options.CACHE_PROBLEMS == CacheProblems::NO_CACHE)
+    {
+        subproblems_manager_->DistributeSubproblems();
+    }
+}
+
+void BendersSequential::free()
+{
+    master_manager_.FreeMaster();
+    if (subproblems_manager_)
+    {
+        subproblems_manager_->free_subproblems();
+    }
+}
+
+void BendersSequential::BuildCut()
+{
+    SubProblemDataMap subproblem_data_map;
+    Timer timer;
+    subproblems_manager_->GetSubproblemCut(subproblem_data_map,
+                                           subproblems_manager_->MakeFastBeginHook(),
+                                           subproblems_manager_->MakeCacheBeginHook(),
+                                           subproblems_manager_->MakePostSolveHook());
+    _data.cuts.subproblem_cost = 0;
+    for (const auto& [_, subproblem_data]: subproblem_data_map)
+    {
+        _data.cuts.subproblem_cost += subproblem_data.subproblem_cost;
+    }
+
+    _data.cuts.subproblems_walltime = timer.elapsed();
+    check_status(subproblem_data_map);
+    cuts_manager_->GatherAndBuildCuts(subproblem_data_map);
+}
+
+void BendersSequential::Run()
+{
+    auto logger = output_manager_.GetLogger();
+
+    PreRunInitialization();
+
+    while (!_data.control.stop)
+    {
+        // TODO(micro-iterations): plugin OnBendersIterationStart hook goes here
+        Timer timer_master;
+        ++_data.control.it;
+
+        if (SwitchToIntegerMaster(_data.control.is_in_initial_relaxation))
+        {
+            logger->LogAtSwitchToInteger();
+            ActivateIntegrityConstraints();
+            ResetDataPostRelaxation();
+        }
+
+        logger->log_at_initialization(_data.control.it
+                                      + output_manager_.GetNumIterationsBeforeRestart());
+        logger->display_message("\tSolving master...");
+        get_master_value();
+        logger->log_master_solving_duration(_data.master.timer_master);
+
+        cuts_manager_->ComputeXCut(_data,
+                                   _options.SEPARATION_PARAM,
+                                   _options.MASTER_SOLUTION_TOLERANCE);
+        logger->log_iteration_candidates(output_manager_.bendersDataToLogData(_data));
+
+        logger->display_message("\tSolving subproblems...");
+        BuildCut();
+        logger->LogSubproblemsSolvingWalltime(_data.cuts.subproblems_walltime);
+
+        compute_ub();
+        update_best_ub();
+
+        logger->log_at_iteration_end(output_manager_.bendersDataToLogData(_data));
+
+        UpdateTrace();
+
+        _data.master.timer_master = timer_master.elapsed();
+        _data.control.iteration_time = -_data.control.benders_time;
+        _data.control.benders_time = GetBendersTime();
+        _data.control.iteration_time += _data.control.benders_time;
+        _data.control.stop = ShouldBendersStop();
+        output_manager_.SaveCurrentBendersData(LastIterationFile(), _options.TRACE);
+    }
+    output_manager_.CloseCsvFile();
+    output_manager_.EndWritingInOutputFile(_data.control.benders_time,
+                                           _options.EXTERNAL_LOOP_OPTIONS.DO_OUTER_LOOP);
+    write_basis();
+}
+
+void BendersSequential::launch()
+{
+    auto logger = output_manager_.GetLogger();
+
+    logger->display_message("Building input");
+    logger->display_message("Constructing workers...");
+
+    InitializeProblems();
+
+    logger->display_message("Running solver...");
+    try
+    {
+        Run();
+        logger->display_message(BendersName() + " solver terminated.");
+    }
+    catch (const std::exception& ex)
+    {
+        exception_raised_ = true;
+        std::string error = "Exception raised : " + std::string(ex.what());
+        logger->display_message(error);
+    }
+
+    post_run_actions();
+    free();
+}

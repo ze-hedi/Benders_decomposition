@@ -15,11 +15,11 @@
 #include <sstream>
 #include <string>
 
-#include "benders_managers/BendersMathLogger.h"
-#include "benders_managers/LastIterationReader.h"
-#include "benders_managers/LastIterationWriter.h"
+#include "utilities/benders_managers_utilities/BendersMathLogger.h"
+#include "utilities/benders_managers_utilities/LastIterationReader.h"
+#include "utilities/benders_managers_utilities/LastIterationWriter.h"
 #include "gtest/gtest.h"
-#include "output/OutputWriter.h"
+#include "utilities/output/OutputWriter.h"
 #include "test_utils/LoggerStub.h"
 #include "test_utils/WriterStub.h"
 

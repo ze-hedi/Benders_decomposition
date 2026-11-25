@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interfaces/ILogger.h"
+#include "utilities/interfaces/ILogger.h"
 
 inline bool operator==(const LogData& lhs, const LogData& rhs)
 {

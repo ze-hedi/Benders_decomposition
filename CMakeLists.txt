@@ -35,29 +35,29 @@ add_library(workers
 target_link_libraries(workers PUBLIC linear_solvers)
 
 add_library(output
-    src/output/JsonWriter.cpp
-    src/output/VoidWriter.cpp)
+    src/utilities/output/JsonWriter.cpp
+    src/utilities/output/VoidWriter.cpp)
 target_link_libraries(output PUBLIC interfaces jsoncpp_static)
 target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 
 add_library(benders_managers
-    src/benders_managers/common.cpp
+    src/utilities/benders_managers_utilities/common.cpp
     src/benders_managers/BendersMasterManager.cpp
-    src/benders_managers/BendersMathLogger.cpp
+    src/utilities/benders_managers_utilities/BendersMathLogger.cpp
     src/benders_managers/BendersOutputManager.cpp
-    src/benders_managers/BendersStructsDatas.cpp
-    src/benders_managers/LastIterationPrinter.cpp
-    src/benders_managers/LastIterationReader.cpp
-    src/benders_managers/LastIterationWriter.cpp)
+    src/utilities/benders_managers_utilities/BendersStructsDatas.cpp
+    src/utilities/benders_managers_utilities/LastIterationPrinter.cpp
+    src/utilities/benders_managers_utilities/LastIterationReader.cpp
+    src/utilities/benders_managers_utilities/LastIterationWriter.cpp)
 target_link_libraries(benders_managers PUBLIC linear_solvers workers interfaces output jsoncpp_static)
 
 add_library(logger
-    src/logger/CandidateLog.cpp
-    src/logger/IterationResultLog.cpp
-    src/logger/Master.cpp
-    src/logger/MathLogger.cpp
-    src/logger/User.cpp
-    src/logger/UserFile.cpp)
+    src/utilities/logger/CandidateLog.cpp
+    src/utilities/logger/IterationResultLog.cpp
+    src/utilities/logger/Master.cpp
+    src/utilities/logger/MathLogger.cpp
+    src/utilities/logger/User.cpp
+    src/utilities/logger/UserFile.cpp)
 target_link_libraries(logger PUBLIC interfaces benders_managers)
 
 add_executable(mathopt_smoke src/main.cpp)

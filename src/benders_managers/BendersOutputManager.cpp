@@ -5,11 +5,11 @@
 #include <fstream>
 #include <utility>
 
-#include "benders_managers/LastIterationPrinter.h"
-#include "benders_managers/LastIterationReader.h"
-#include "benders_managers/LastIterationWriter.h"
-#include "interfaces/LogUtils.h"
-#include "output/OutputWriter.h"
+#include "utilities/benders_managers_utilities/LastIterationPrinter.h"
+#include "utilities/benders_managers_utilities/LastIterationReader.h"
+#include "utilities/benders_managers_utilities/LastIterationWriter.h"
+#include "utilities/interfaces/LogUtils.h"
+#include "utilities/output/OutputWriter.h"
 
 BendersOutputManager::BendersOutputManager(
   Logger logger,

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "output/OutputWriter.h"
+#include "utilities/output/OutputWriter.h"
 
 namespace Benders::Test
 {

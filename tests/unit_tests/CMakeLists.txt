@@ -35,7 +35,7 @@ add_test(NAME test_workers COMMAND test_workers)
 set_property(TEST test_workers PROPERTY LABELS unit)
 
 add_executable(test_interfaces
-        interfaces/test_interfaces.cpp
+        utilities/interfaces/test_interfaces.cpp
 )
 
 target_link_libraries(test_interfaces PRIVATE
@@ -47,9 +47,9 @@ add_test(NAME test_interfaces COMMAND test_interfaces)
 set_property(TEST test_interfaces PROPERTY LABELS unit)
 
 add_executable(test_benders_managers
-        benders_managers/test_common.cpp
-        benders_managers/test_benders_structs_datas.cpp
-        benders_managers/test_last_iteration.cpp
+        utilities/benders_managers_utilities/test_common.cpp
+        utilities/benders_managers_utilities/test_benders_structs_datas.cpp
+        utilities/benders_managers_utilities/test_last_iteration.cpp
         benders_managers/test_benders_output_manager.cpp
         benders_managers/test_benders_master_manager.cpp
 )
@@ -69,8 +69,8 @@ add_test(NAME test_benders_managers COMMAND test_benders_managers)
 set_property(TEST test_benders_managers PROPERTY LABELS unit)
 
 add_executable(test_output
-        output/test_json_writer.cpp
-        output/test_void_writer.cpp
+        utilities/output/test_json_writer.cpp
+        utilities/output/test_void_writer.cpp
 )
 
 target_link_libraries(test_output PRIVATE
@@ -82,8 +82,8 @@ add_test(NAME test_output COMMAND test_output)
 set_property(TEST test_output PROPERTY LABELS unit)
 
 add_executable(test_logger
-        logger/test_logger.cpp
-        logger/test_math_logger.cpp
+        utilities/logger/test_logger.cpp
+        utilities/logger/test_math_logger.cpp
 )
 
 target_include_directories(test_logger PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

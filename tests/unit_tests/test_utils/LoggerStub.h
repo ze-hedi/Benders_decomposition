@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "interfaces/ILogger.h"
+#include "utilities/interfaces/ILogger.h"
 
 namespace Benders::Test
 {

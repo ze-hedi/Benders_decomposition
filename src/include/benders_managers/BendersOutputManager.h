@@ -4,10 +4,10 @@
 #include <fstream>
 #include <memory>
 
-#include "benders_managers/BendersMathLogger.h"
-#include "benders_managers/BendersStructsDatas.h"
-#include "interfaces/ILogger.h"
-#include "output/OutputWriter.h"
+#include "utilities/benders_managers_utilities/BendersMathLogger.h"
+#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/interfaces/ILogger.h"
+#include "utilities/output/OutputWriter.h"
 
 class BendersOutputManager
 {

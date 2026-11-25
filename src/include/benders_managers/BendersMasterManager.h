@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "benders_managers/BendersStructsDatas.h"
-#include "benders_managers/common.h"
-#include "interfaces/ILogger.h"
-#include "output/OutputWriter.h"
+#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/interfaces/ILogger.h"
+#include "utilities/output/OutputWriter.h"
 #include "workers/WorkerMaster.h"
 
 class BendersMasterManager

@@ -34,6 +34,12 @@ add_library(workers
     src/workers/WorkerMaster.cpp)
 target_link_libraries(workers PUBLIC linear_solvers)
 
+add_library(output
+    src/output/JsonWriter.cpp
+    src/output/VoidWriter.cpp)
+target_link_libraries(output PUBLIC interfaces jsoncpp_static)
+target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
+
 add_library(benders_managers
     src/benders_managers/common.cpp
     src/benders_managers/BendersStructsDatas.cpp)

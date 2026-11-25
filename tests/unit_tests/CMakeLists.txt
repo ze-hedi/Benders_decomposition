@@ -58,3 +58,16 @@ target_link_libraries(test_benders_managers PRIVATE
 
 add_test(NAME test_benders_managers COMMAND test_benders_managers)
 set_property(TEST test_benders_managers PROPERTY LABELS unit)
+
+add_executable(test_output
+        output/test_json_writer.cpp
+        output/test_void_writer.cpp
+)
+
+target_link_libraries(test_output PRIVATE
+        output
+        GTest::gtest_main
+)
+
+add_test(NAME test_output COMMAND test_output)
+set_property(TEST test_output PROPERTY LABELS unit)

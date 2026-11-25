@@ -14,3 +14,22 @@ target_compile_definitions(test_linear_solvers PRIVATE
 
 add_test(NAME test_linear_solvers COMMAND test_linear_solvers)
 set_property(TEST test_linear_solvers PROPERTY LABELS unit)
+
+add_executable(test_workers
+        workers/test_cut.cpp
+        workers/test_worker.cpp
+        workers/test_subproblem_worker.cpp
+        workers/test_worker_master.cpp
+)
+
+target_link_libraries(test_workers PRIVATE
+        workers
+        GTest::gtest_main
+)
+
+target_compile_definitions(test_workers PRIVATE
+        TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
+)
+
+add_test(NAME test_workers COMMAND test_workers)
+set_property(TEST test_workers PROPERTY LABELS unit)

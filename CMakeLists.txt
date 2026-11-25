@@ -40,6 +40,14 @@ add_library(output
 target_link_libraries(output PUBLIC interfaces jsoncpp_static)
 target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 
+add_library(logger
+    src/logger/CandidateLog.cpp
+    src/logger/IterationResultLog.cpp
+    src/logger/Master.cpp
+    src/logger/User.cpp
+    src/logger/UserFile.cpp)
+target_link_libraries(logger PUBLIC interfaces)
+
 add_library(benders_managers
     src/benders_managers/common.cpp
     src/benders_managers/BendersStructsDatas.cpp)

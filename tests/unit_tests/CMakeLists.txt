@@ -71,3 +71,17 @@ target_link_libraries(test_output PRIVATE
 
 add_test(NAME test_output COMMAND test_output)
 set_property(TEST test_output PROPERTY LABELS unit)
+
+add_executable(test_logger
+        logger/test_logger.cpp
+)
+
+target_include_directories(test_logger PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(test_logger PRIVATE
+        logger
+        GTest::gtest_main
+)
+
+add_test(NAME test_logger COMMAND test_logger)
+set_property(TEST test_logger PROPERTY LABELS unit)

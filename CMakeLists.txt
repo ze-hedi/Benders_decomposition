@@ -34,6 +34,11 @@ add_library(workers
     src/workers/WorkerMaster.cpp)
 target_link_libraries(workers PUBLIC linear_solvers)
 
+add_library(benders_managers
+    src/benders_managers/common.cpp
+    src/benders_managers/BendersStructsDatas.cpp)
+target_link_libraries(benders_managers PUBLIC linear_solvers interfaces)
+
 add_executable(mathopt_smoke src/main.cpp)
 target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)
 

@@ -45,3 +45,16 @@ target_link_libraries(test_interfaces PRIVATE
 
 add_test(NAME test_interfaces COMMAND test_interfaces)
 set_property(TEST test_interfaces PROPERTY LABELS unit)
+
+add_executable(test_benders_managers
+        benders_managers/test_common.cpp
+        benders_managers/test_benders_structs_datas.cpp
+)
+
+target_link_libraries(test_benders_managers PRIVATE
+        benders_managers
+        GTest::gtest_main
+)
+
+add_test(NAME test_benders_managers COMMAND test_benders_managers)
+set_property(TEST test_benders_managers PROPERTY LABELS unit)

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -131,6 +132,28 @@ std::string SolverTypeToName(SolverType solver_type)
     throw GenericSolverException("Unknown solver type");
 }
 } // namespace
+
+SolverType SolverTypeFromString(const std::string& solver_name)
+{
+    std::string upper_name(solver_name);
+    std::ranges::transform(upper_name,
+                           upper_name.begin(),
+                           [](unsigned char c) { return std::toupper(c); });
+    for (auto solver_type: {SolverType::GLOP,
+                            SolverType::PDLP,
+                            SolverType::HIGHS,
+                            SolverType::GSCIP,
+                            SolverType::CP_SAT,
+                            SolverType::GUROBI,
+                            SolverType::XPRESS})
+    {
+        if (SolverTypeToName(solver_type) == upper_name)
+        {
+            return solver_type;
+        }
+    }
+    throw GenericSolverException("Unknown solver name '" + solver_name + "'");
+}
 
 /*************************************************************************************************
 -----------------------------------    Constructor/Destructor

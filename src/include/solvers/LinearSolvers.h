@@ -96,6 +96,13 @@ public:
     }
 };
 
+/**
+ * @brief Solver type from its name, e.g. "HIGHS" (case insensitive)
+ *
+ * @throws GenericSolverException if no solver has this name
+ */
+SolverType SolverTypeFromString(const std::string& solver_name);
+
 // Definition of optimality codes
 enum SOLVER_STATUS
 {

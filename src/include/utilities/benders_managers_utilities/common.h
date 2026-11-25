@@ -10,9 +10,14 @@
 #include "workers/types.h"
 
 using Str2Dbl = std::map<std::string, double>;
+// Linking variables of each subproblem, by subproblem name
+using CouplingMap = std::map<std::string, VariableMap>;
 
 inline const std::string MPS_SUFFIX = ".mps";
 inline const std::string SAVE_SUFFIX = ".svf";
+
+inline const std::string SUBPROBLEM_WEIGHT_CST_STR = "CONSTANT";
+inline const std::string SUBPROBLEM_WEIGHT_UNIFORM_CST_STR = "UNIFORM";
 
 enum class MasterFormulation
 {

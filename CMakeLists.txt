@@ -48,7 +48,8 @@ add_library(benders_managers
     src/utilities/benders_managers_utilities/BendersStructsDatas.cpp
     src/utilities/benders_managers_utilities/LastIterationPrinter.cpp
     src/utilities/benders_managers_utilities/LastIterationReader.cpp
-    src/utilities/benders_managers_utilities/LastIterationWriter.cpp)
+    src/utilities/benders_managers_utilities/LastIterationWriter.cpp
+    src/utilities/benders_managers_utilities/SubproblemBasisCache.cpp)
 target_link_libraries(benders_managers PUBLIC linear_solvers workers interfaces output jsoncpp_static)
 
 add_library(logger

@@ -54,6 +54,7 @@ add_executable(test_benders_managers
         benders_managers/test_benders_master_manager.cpp
         benders_managers/test_benders_subproblems_manager.cpp
         benders_managers/test_benders_cuts_manager.cpp
+        benders_managers/test_benders_loop.cpp
         utilities/benders_managers_utilities/test_subproblem_basis_cache.cpp
 )
 

@@ -44,6 +44,8 @@ add_library(benders_managers
     src/utilities/benders_managers_utilities/common.cpp
     src/benders_managers/BendersMasterManager.cpp
     src/benders_managers/BendersCutsManagerSequential.cpp
+    src/benders_managers/SubproblemConstraintsManager.cpp
+    src/utilities/benders_managers_utilities/SolverRowExtractor.cpp
     src/utilities/benders_managers_utilities/BendersMathLogger.cpp
     src/benders_managers/BendersOutputManager.cpp
     src/utilities/benders_managers_utilities/BendersStructsDatas.cpp

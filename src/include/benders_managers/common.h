@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <filesystem>
+#include <json/value.h>
 #include <map>
 #include <ostream>
 #include <string>
@@ -69,6 +71,11 @@ enum class ProblemFormat
  *  \brief Return the distance between two points using the 2-norm
  */
 double norm_point(const Point& x0, const Point& x1);
+
+/*!
+ *  \brief Parse a json file. Prints the error to std::cerr and returns a null value when invalid
+ */
+Json::Value get_json_file_content(const std::filesystem::path& json_file);
 
 struct BaseOptions
 {

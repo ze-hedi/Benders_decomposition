@@ -49,7 +49,10 @@ set_property(TEST test_interfaces PROPERTY LABELS unit)
 add_executable(test_benders_managers
         benders_managers/test_common.cpp
         benders_managers/test_benders_structs_datas.cpp
+        benders_managers/test_last_iteration.cpp
 )
+
+target_include_directories(test_benders_managers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(test_benders_managers PRIVATE
         benders_managers

@@ -51,6 +51,7 @@ add_executable(test_benders_managers
         benders_managers/test_benders_structs_datas.cpp
         benders_managers/test_last_iteration.cpp
         benders_managers/test_benders_output_manager.cpp
+        benders_managers/test_benders_master_manager.cpp
 )
 
 target_include_directories(test_benders_managers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -58,6 +59,10 @@ target_include_directories(test_benders_managers PRIVATE ${CMAKE_CURRENT_SOURCE_
 target_link_libraries(test_benders_managers PRIVATE
         benders_managers
         GTest::gtest_main
+)
+
+target_compile_definitions(test_benders_managers PRIVATE
+        TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
 )
 
 add_test(NAME test_benders_managers COMMAND test_benders_managers)

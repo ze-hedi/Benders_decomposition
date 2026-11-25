@@ -11,6 +11,9 @@
 
 using Str2Dbl = std::map<std::string, double>;
 
+inline const std::string MPS_SUFFIX = ".mps";
+inline const std::string SAVE_SUFFIX = ".svf";
+
 enum class MasterFormulation
 {
     INTEGER,

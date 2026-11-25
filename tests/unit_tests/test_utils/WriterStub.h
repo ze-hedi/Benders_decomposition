@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "output/OutputWriter.h"
 
@@ -75,5 +76,23 @@ public:
     void WriteProblemFormat(const std::string format) override
     {
     }
+};
+
+// Output writer that records the problems it is given and the number of dumps
+class WriterRecorder: public WriterNOOPStub
+{
+public:
+    void dump() override
+    {
+        ++dumps;
+    }
+
+    void WriteProblem(const Output::ProblemData& problem_data) override
+    {
+        problems.push_back(problem_data);
+    }
+
+    std::vector<Output::ProblemData> problems;
+    int dumps = 0;
 };
 } // namespace Benders::Test

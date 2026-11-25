@@ -1170,12 +1170,9 @@ int SolverMathOpt::solve_lp()
     }
 
     // Pass warm-start basis if one was set via set_basis() or read_basis().
-    // Consumed on use so subsequent solves start fresh unless re-set.
-    if (_initial_basis.has_value())
-    {
-        args_.model_parameters.initial_basis = _initial_basis;
-        _initial_basis.reset();
-    }
+    // Consumed on use so subsequent solves start fresh unless re-set: args_ is kept between
+    // solves, so it is always overwritten, otherwise a stale basis would be passed again
+    args_.model_parameters.initial_basis = std::exchange(_initial_basis, std::nullopt);
 
     auto result = math_opt::Solve(*_model, ToMathOptSolverType(_solver_type), args_);
     if (!result.ok())
@@ -1222,6 +1219,9 @@ int SolverMathOpt::solve_mip()
     {
         args_.parameters.enable_output = (_log_level > 0);
     }
+
+    // A basis only warm starts an LP solve, drop the one a previous LP solve may have left
+    args_.model_parameters.initial_basis.reset();
 
     auto result = math_opt::Solve(*_model, ToMathOptSolverType(_solver_type), args_);
     if (!result.ok())

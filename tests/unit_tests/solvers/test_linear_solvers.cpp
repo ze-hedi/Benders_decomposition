@@ -270,6 +270,34 @@ TEST_F(SolverMathOptTest, SetBasis_StoresBasisFromArrays)
     EXPECT_EQ(solver2->solve_lp(), OPTIMAL);
 }
 
+// The basis only fits the problem it was set on: a later solve, after rows are added, must not
+// reuse it
+TEST_F(SolverMathOptTest, SetBasis_UsedByNextLpSolveOnly)
+{
+    auto solver = make_solver(lp_path_);
+    solver->solve_lp();
+    const BasisStatuses basis = solver->get_basis();
+
+    auto solver2 = make_solver(lp_path_);
+    solver2->set_basis(basis.rows, basis.cols);
+    ASSERT_EQ(solver2->solve_lp(), OPTIMAL);
+    solver2->add_rows({'L'}, {100.0}, {}, {0}, {0}, {1.0});
+    EXPECT_EQ(solver2->solve_lp(), OPTIMAL);
+}
+
+TEST_F(SolverMathOptTest, SetBasis_NotUsedByMipSolve)
+{
+    auto solver = make_solver(lp_path_);
+    solver->solve_lp();
+    const BasisStatuses basis = solver->get_basis();
+
+    auto solver2 = make_solver(lp_path_);
+    solver2->set_basis(basis.rows, basis.cols);
+    ASSERT_EQ(solver2->solve_lp(), OPTIMAL);
+    solver2->add_rows({'L'}, {100.0}, {}, {0}, {0}, {1.0});
+    EXPECT_EQ(solver2->solve_mip(), OPTIMAL);
+}
+
 // ===========================================================================
 //
 //  PROBLEM MODIFICATION TESTS

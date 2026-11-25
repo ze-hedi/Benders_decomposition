@@ -62,6 +62,10 @@ add_library(logger
     src/utilities/logger/UserFile.cpp)
 target_link_libraries(logger PUBLIC interfaces benders_managers)
 
+add_library(implementations
+    src/implementations/BendersBase.cpp)
+target_link_libraries(implementations PUBLIC benders_managers logger output)
+
 add_executable(mathopt_smoke src/main.cpp)
 target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)
 

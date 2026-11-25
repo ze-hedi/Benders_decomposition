@@ -12,7 +12,8 @@ target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 
 add_library(workers
-    src/workers/Worker.cpp)
+    src/workers/Worker.cpp
+    src/workers/SubproblemWorker.cpp)
 target_link_libraries(workers PUBLIC linear_solvers)
 
 add_executable(mathopt_smoke src/main.cpp)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <exception>
 #include <execution>
 #include <filesystem>
 #include <functional>
@@ -106,6 +108,201 @@ public:
     }
 
     // ---------------------------------------------------------------
+    // CRTP dispatch: hooks (variadic to allow batch-scoped args)
+    // ---------------------------------------------------------------
+
+    template<typename... Args>
+    FastBeginHook MakeFastBeginHook(Args&&... args)
+    {
+        return static_cast<Derived*>(this)->MakeFastBeginHookImpl(std::forward<Args>(args)...);
+    }
+
+    template<typename... Args>
+    CacheBeginHook MakeCacheBeginHook(Args&&... args)
+    {
+        return static_cast<Derived*>(this)->MakeCacheBeginHookImpl(std::forward<Args>(args)...);
+    }
+
+    template<typename... Args>
+    PostSolveHook MakePostSolveHook(Args&&... args)
+    {
+        return static_cast<Derived*>(this)->MakePostSolveHookImpl(std::forward<Args>(args)...);
+    }
+
+    // ---------------------------------------------------------------
+    // Default hook implementations (iterate all subproblems)
+    // ---------------------------------------------------------------
+
+    FastBeginHook MakeFastBeginHookImpl()
+    {
+        return [this]()
+        {
+            std::vector<std::pair<std::string, SubproblemWorkerPtr>> nameAndWorkers;
+            nameAndWorkers.reserve(subproblem_map_.size());
+            for (const auto& [name, worker]: subproblem_map_)
+            {
+                nameAndWorkers.emplace_back(name, worker);
+            }
+            return nameAndWorkers;
+        };
+    }
+
+    CacheBeginHook MakeCacheBeginHookImpl()
+    {
+        return [this]()
+        {
+            std::vector<std::pair<std::string, VariableMap>> nameAndVariableMap;
+            nameAndVariableMap.reserve(coupling_map_.size());
+            for (auto& [name, variables]: coupling_map_)
+            {
+                nameAndVariableMap.emplace_back(name, variables);
+            }
+            return nameAndVariableMap;
+        };
+    }
+
+    // As we want to unify the api, for now the post solve hook is only needed to compute crieterion
+    // stuff on BendersMPI, to avoid setting nullptr on the api from the benders sequential and
+    // bybatch cases we decided to just impelement a hook that renders a void method
+    auto MakePostSolveHookImpl()
+    {
+        return [](const std::string&, PlainData::SubProblemData&, const SubproblemWorkerPtr&) {};
+    }
+
+    // ---------------------------------------------------------------
+    // Dispatcher
+    // ---------------------------------------------------------------
+
+    void GetSubproblemCut(SubProblemDataMap& subproblem_data_map,
+                          const FastBeginHook& fast_begin_hook,
+                          const CacheBeginHook& cache_begin_hook,
+                          const PostSolveHook& post_solve_hook)
+    {
+        switch (options_.CACHE_PROBLEMS)
+        {
+        case CacheProblems::NO_CACHE:
+            GetSubproblemCutFast(subproblem_data_map, fast_begin_hook, post_solve_hook);
+            break;
+        case CacheProblems::PER_SUB:
+            GetSubproblemCutCache(subproblem_data_map, cache_begin_hook, post_solve_hook);
+            break;
+        default:
+            // CacheProblems::COMPACT is rejected at construction
+            break;
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Execution policy selection
+    // ---------------------------------------------------------------
+
+    // Subproblems are solved with Derived::EXECUTION_POLICY. xpansion falls back to a sequential
+    // loop for micro-iterations, which are rejected at construction here.
+    template<typename It, typename F>
+    void ForEachSubproblem(It first, It last, F&& f)
+    {
+        std::for_each(Derived::EXECUTION_POLICY, first, last, std::forward<F>(f));
+    }
+
+    // ---------------------------------------------------------------
+    // Cache=0: fast path — persistent workers
+    // ---------------------------------------------------------------
+
+    void GetSubproblemCutFast(SubProblemDataMap& subproblem_data_map,
+                              const FastBeginHook& begin_hook,
+                              const PostSolveHook& post_solve_hook)
+    {
+        auto nameAndWorkers = begin_hook();
+
+        std::mutex m;
+        std::exception_ptr first_exception;
+        ForEachSubproblem(nameAndWorkers.begin(),
+                          nameAndWorkers.end(),
+                          [this, &m, &subproblem_data_map, &first_exception, &post_solve_hook](
+                            const std::pair<std::string, SubproblemWorkerPtr>& kvp)
+                          {
+                              try
+                              {
+                                  PlainData::SubProblemData subproblem_data;
+                                  const auto& [name, worker] = kvp;
+                                  SolveSubproblem(subproblem_data, name, worker, nullptr);
+                                  post_solve_hook(name, subproblem_data, worker);
+
+                                  std::lock_guard guard(m);
+                                  subproblem_data_map[name] = subproblem_data;
+                              }
+                              catch (...)
+                              {
+                                  std::lock_guard guard(m);
+                                  if (!first_exception)
+                                  {
+                                      first_exception = std::current_exception();
+                                  }
+                              }
+                          });
+        if (first_exception)
+        {
+            std::rethrow_exception(first_exception);
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Cache=1: disk cache — recreate workers each iteration
+    // ---------------------------------------------------------------
+
+    void GetSubproblemCutCache(SubProblemDataMap& subproblem_data_map,
+                               const CacheBeginHook& begin_hook,
+                               const PostSolveHook& post_solve_hook)
+    {
+        auto nameAndVariableMap = begin_hook();
+
+        std::mutex m;
+        std::exception_ptr first_exception;
+
+        ForEachSubproblem(nameAndVariableMap.begin(),
+                          nameAndVariableMap.end(),
+                          [this, &m, &subproblem_data_map, &first_exception, &post_solve_hook](
+                            const std::pair<std::string, VariableMap>& kvp)
+                          {
+                              try
+                              {
+                                  const auto& [name, variables] = kvp;
+                                  auto worker = makeSubproblemWorker(kvp);
+                                  PlainData::SubProblemData subproblem_data;
+                                  SolveSubproblem(subproblem_data,
+                                                  name,
+                                                  worker,
+                                                  [this, &name, &worker]
+                                                  { TryRestoreSubproblemBasis(name, worker); });
+                                  post_solve_hook(name, subproblem_data, worker);
+
+                                  std::call_once(
+                                    variable_indice_once_flag_,
+                                    [this](const auto& worker_)
+                                    { SetSubproblemVariablesIndices(worker_); },
+                                    *worker);
+
+                                  StoreSubproblemBasis(name, worker);
+
+                                  std::lock_guard guard(m);
+                                  subproblem_data_map[name] = subproblem_data;
+                              }
+                              catch (...)
+                              {
+                                  std::lock_guard guard(m);
+                                  if (!first_exception)
+                                  {
+                                      first_exception = std::current_exception();
+                                  }
+                              }
+                          });
+        if (first_exception)
+        {
+            std::rethrow_exception(first_exception);
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Core solve (uniform for all variants — no virtual override)
     // ---------------------------------------------------------------
 
@@ -180,6 +377,44 @@ public:
         {
             problem_to_id_[problem.first] = count;
             count++;
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Basis management
+    // ---------------------------------------------------------------
+
+    void StoreSubproblemBasis(const std::string& name,
+                              const std::shared_ptr<SubproblemWorker>& worker)
+    {
+        subproblem_basis_cache_.Store(name, worker->solver());
+    }
+
+    void TryRestoreSubproblemBasis(const std::string& name,
+                                   const std::shared_ptr<SubproblemWorker>& worker)
+    {
+        subproblem_basis_cache_.TryRestore(name, worker->solver(), logger_);
+    }
+
+    // ---------------------------------------------------------------
+    // Variable indices (criterion support)
+    // ---------------------------------------------------------------
+
+    void SetSubproblemVariablesIndices(const SubproblemWorker& subproblem)
+    {
+        auto&& col_names = subproblem.solver().get_col_names(0, subproblem.ncols() - 1);
+        if (on_variables_indices_set_)
+        {
+            on_variables_indices_set_(col_names);
+        }
+    }
+
+    void SetSubproblemsVariablesIndices()
+    {
+        if (!subproblem_map_.empty())
+        {
+            auto subproblem = subproblem_map_.begin();
+            SetSubproblemVariablesIndices(*subproblem->second);
         }
     }
 

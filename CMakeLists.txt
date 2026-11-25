@@ -13,3 +13,8 @@ target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 
 add_executable(mathopt_smoke src/main.cpp)
 target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

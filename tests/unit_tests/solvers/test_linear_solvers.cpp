@@ -815,3 +815,30 @@ TEST_F(SolverMathOptTest, InvalidSolverStatusException_CarriesMessageAndLocation
         EXPECT_NE(what.find("test_linear_solvers.cpp"), std::string::npos);
     }
 }
+
+// ---------------------------------------------------------------------------
+// SolverTypeFromString
+// ---------------------------------------------------------------------------
+
+TEST(SolverTypeFromStringTest, KnownNames)
+{
+    EXPECT_EQ(SolverTypeFromString("GLOP"), SolverType::GLOP);
+    EXPECT_EQ(SolverTypeFromString("PDLP"), SolverType::PDLP);
+    EXPECT_EQ(SolverTypeFromString("HIGHS"), SolverType::HIGHS);
+    EXPECT_EQ(SolverTypeFromString("GSCIP"), SolverType::GSCIP);
+    EXPECT_EQ(SolverTypeFromString("CP_SAT"), SolverType::CP_SAT);
+    EXPECT_EQ(SolverTypeFromString("GUROBI"), SolverType::GUROBI);
+    EXPECT_EQ(SolverTypeFromString("XPRESS"), SolverType::XPRESS);
+}
+
+TEST(SolverTypeFromStringTest, IgnoresCase)
+{
+    EXPECT_EQ(SolverTypeFromString("highs"), SolverType::HIGHS);
+    EXPECT_EQ(SolverTypeFromString("Xpress"), SolverType::XPRESS);
+}
+
+TEST(SolverTypeFromStringTest, UnknownName_Throws)
+{
+    EXPECT_THROW(SolverTypeFromString("COIN"), GenericSolverException);
+    EXPECT_THROW(SolverTypeFromString(""), GenericSolverException);
+}

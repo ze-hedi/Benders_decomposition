@@ -52,6 +52,8 @@ add_executable(test_benders_managers
         utilities/benders_managers_utilities/test_last_iteration.cpp
         benders_managers/test_benders_output_manager.cpp
         benders_managers/test_benders_master_manager.cpp
+        benders_managers/test_benders_subproblems_manager.cpp
+        utilities/benders_managers_utilities/test_subproblem_basis_cache.cpp
 )
 
 target_include_directories(test_benders_managers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -7,5 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ortools CONFIG REQUIRED)
 
+add_library(linear_solvers src/solvers/LinearSolvers.cpp)
+target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+target_link_libraries(linear_solvers PUBLIC ortools::ortools)
+
 add_executable(mathopt_smoke src/main.cpp)
 target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)

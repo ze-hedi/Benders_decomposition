@@ -77,6 +77,7 @@ set_property(TEST test_output PROPERTY LABELS unit)
 
 add_executable(test_logger
         logger/test_logger.cpp
+        logger/test_math_logger.cpp
 )
 
 target_include_directories(test_logger PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

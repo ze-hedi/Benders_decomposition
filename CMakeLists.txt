@@ -40,21 +40,23 @@ add_library(output
 target_link_libraries(output PUBLIC interfaces jsoncpp_static)
 target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 
-add_library(logger
-    src/logger/CandidateLog.cpp
-    src/logger/IterationResultLog.cpp
-    src/logger/Master.cpp
-    src/logger/User.cpp
-    src/logger/UserFile.cpp)
-target_link_libraries(logger PUBLIC interfaces)
-
 add_library(benders_managers
     src/benders_managers/common.cpp
+    src/benders_managers/BendersMathLogger.cpp
     src/benders_managers/BendersStructsDatas.cpp
     src/benders_managers/LastIterationPrinter.cpp
     src/benders_managers/LastIterationReader.cpp
     src/benders_managers/LastIterationWriter.cpp)
 target_link_libraries(benders_managers PUBLIC linear_solvers interfaces jsoncpp_static)
+
+add_library(logger
+    src/logger/CandidateLog.cpp
+    src/logger/IterationResultLog.cpp
+    src/logger/Master.cpp
+    src/logger/MathLogger.cpp
+    src/logger/User.cpp
+    src/logger/UserFile.cpp)
+target_link_libraries(logger PUBLIC interfaces benders_managers)
 
 add_executable(mathopt_smoke src/main.cpp)
 target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)

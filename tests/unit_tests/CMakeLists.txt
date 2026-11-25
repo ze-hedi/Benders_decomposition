@@ -50,6 +50,7 @@ add_executable(test_benders_managers
         benders_managers/test_common.cpp
         benders_managers/test_benders_structs_datas.cpp
         benders_managers/test_last_iteration.cpp
+        benders_managers/test_benders_output_manager.cpp
 )
 
 target_include_directories(test_benders_managers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -43,11 +43,12 @@ target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 add_library(benders_managers
     src/benders_managers/common.cpp
     src/benders_managers/BendersMathLogger.cpp
+    src/benders_managers/BendersOutputManager.cpp
     src/benders_managers/BendersStructsDatas.cpp
     src/benders_managers/LastIterationPrinter.cpp
     src/benders_managers/LastIterationReader.cpp
     src/benders_managers/LastIterationWriter.cpp)
-target_link_libraries(benders_managers PUBLIC linear_solvers interfaces jsoncpp_static)
+target_link_libraries(benders_managers PUBLIC linear_solvers interfaces output jsoncpp_static)
 
 add_library(logger
     src/logger/CandidateLog.cpp

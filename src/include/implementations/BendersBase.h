@@ -120,7 +120,7 @@ protected:
 
     void reset_master(const VariableMap& variable_map,
                       const std::filesystem::path& mps_path,
-                      const std::string& solver_name,
+                      SolverType solver_type,
                       int log_level,
                       int subproblems_count,
                       RestartMode restart_mode,

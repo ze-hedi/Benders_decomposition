@@ -27,7 +27,11 @@ public:
     {
     }
 
-    void write_solver_name(const std::string& solver_name) override
+    void write_master_solver(const std::string& solver_name) override
+    {
+    }
+
+    void write_subproblem_solver(const std::string& solver_name) override
     {
     }
 

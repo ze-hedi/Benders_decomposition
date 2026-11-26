@@ -7,6 +7,7 @@
 #include <json/reader.h>
 #include <map>
 #include <set>
+#include <sstream>
 
 namespace
 {
@@ -165,12 +166,20 @@ std::map<std::string, Setter> BuildSetters()
                 Fail("MASTER_NAME", "must not be empty");
             }
         });
-    add("SOLVER_NAME",
+    // Checked against their role in CheckSolvers, once MASTER_FORMULATION is known
+    add("MASTER_SOLVER",
         [](const Json::Value& value, BendersBaseOptions& options)
         {
-            options.SOLVER_NAME = ReadEnum<std::string>("SOLVER_NAME",
-                                                        value,
-                                                        {{"GLOP", "GLOP"}, {"HIGHS", "HIGHS"}});
+            options.MASTER_SOLVER = ReadEnum<SolverType>("MASTER_SOLVER",
+                                                         value,
+                                                         SOLVER_TYPE_BY_NAME);
+        });
+    add("SUBPROBLEM_SOLVER",
+        [](const Json::Value& value, BendersBaseOptions& options)
+        {
+            options.SUBPROBLEM_SOLVER = ReadEnum<SolverType>("SUBPROBLEM_SOLVER",
+                                                             value,
+                                                             SOLVER_TYPE_BY_NAME);
         });
     // OUTPUTROOT is resolved against the input root in ReadOptions
     add("OUTPUTROOT", Field_("OUTPUTROOT", &BendersBaseOptions::OUTPUTROOT, ReadString));
@@ -329,6 +338,34 @@ std::string Suggestion(const std::string& key)
     }
     return best.empty() ? "" : " (did you mean " + best + "?)";
 }
+
+std::string NameOf(SolverType solver_type)
+{
+    std::ostringstream name;
+    name << solver_type;
+    return name.str();
+}
+
+void CheckSolvers(const BendersBaseOptions& options, std::vector<std::string>& warnings)
+{
+    if (options.MASTER_FORMULATION == MasterFormulation::INTEGER
+        && !SolvesMip(options.MASTER_SOLVER))
+    {
+        Fail("MASTER_SOLVER",
+             NameOf(options.MASTER_SOLVER)
+               + " does not solve MIPs: use another solver or set MASTER_FORMULATION to RELAXED");
+    }
+    if (!GivesDualsAndBasis(options.SUBPROBLEM_SOLVER))
+    {
+        Fail("SUBPROBLEM_SOLVER",
+             NameOf(options.SUBPROBLEM_SOLVER)
+               + " does not give the duals and the basis that the cuts and warm starts need");
+    }
+    if (options.SUBPROBLEM_SOLVER == SolverType::GSCIP)
+    {
+        warnings.push_back("Option SUBPROBLEM_SOLVER: GSCIP duals on LPs may be unreliable");
+    }
+}
 } // namespace
 
 OptionsReadResult ReadOptions(const Json::Value& json, const std::filesystem::path& input_root)
@@ -364,6 +401,8 @@ OptionsReadResult ReadOptions(const Json::Value& json, const std::filesystem::pa
             Fail(key, "unknown option" + Suggestion(key));
         }
     }
+
+    CheckSolvers(options, result.warnings);
 
     options.INPUTROOT = input_root.string();
     const std::filesystem::path output_root = options.OUTPUTROOT.empty()

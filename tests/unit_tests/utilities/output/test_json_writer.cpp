@@ -249,7 +249,8 @@ TEST_F(JsonWriterTest, EndWritingShouldPrintIterationsData)
 
     writer.write_log_level(1);
     writer.write_master_name("Name");
-    writer.write_solver_name("Solver");
+    writer.write_master_solver("Master solver");
+    writer.write_subproblem_solver("Subproblem solver");
     writer.end_writing(iterations_data);
 
     const Json::Value json_content = get_value_from_json(file_name_);
@@ -261,7 +262,8 @@ TEST_F(JsonWriterTest, EndWritingShouldPrintIterationsData)
     EXPECT_EQ(json_content[RUN_DURATION_C].asDouble(), 55.0);
     EXPECT_EQ(json_content[OPTIONS_C][LOG_LEVEL_C].asInt(), 1);
     EXPECT_EQ(json_content[OPTIONS_C][MASTER_NAME_C].asString(), "Name");
-    EXPECT_EQ(json_content[OPTIONS_C][SOLVER_NAME_C].asString(), "Solver");
+    EXPECT_EQ(json_content[OPTIONS_C][MASTER_SOLVER_C].asString(), "Master solver");
+    EXPECT_EQ(json_content[OPTIONS_C][SUBPROBLEM_SOLVER_C].asString(), "Subproblem solver");
 }
 
 TEST_F(JsonWriterTest, WriteIterationShouldPrintIterationInOutfile)

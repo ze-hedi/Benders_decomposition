@@ -8,6 +8,7 @@
 #include <string>
 
 #include "solvers/RestartMode.h"
+#include "solvers/SolverType.h"
 #include "workers/types.h"
 
 using Str2Dbl = std::map<std::string, double>;
@@ -42,7 +43,8 @@ double norm_point(const Point& x0, const Point& x1);
  */
 Json::Value get_json_file_content(const std::filesystem::path& json_file);
 
-// Defaults follow xpansion's SimulationOptions, except SOLVER_NAME (only GLOP/HiGHS exist here).
+// Defaults follow xpansion's SimulationOptions, except the solvers: xpansion has a single SOLVER_NAME,
+// here the master and the subproblems each have theirs, HiGHS by default.
 // INPUTROOT is not read from the options file: it is set by whoever loads the study.
 struct BaseOptions
 {
@@ -51,7 +53,8 @@ struct BaseOptions
     std::string INPUTROOT;
     std::string OUTPUTROOT;
     std::string MASTER_NAME = "master";
-    std::string SOLVER_NAME = "HIGHS";
+    SolverType MASTER_SOLVER = SolverType::HIGHS;
+    SolverType SUBPROBLEM_SOLVER = SolverType::HIGHS;
 };
 
 struct SolverBaseOptions: public BaseOptions

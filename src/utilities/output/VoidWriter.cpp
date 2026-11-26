@@ -52,7 +52,12 @@ void VoidWriter::end_writing(const IterationsData& iterations_data)
     // keep this method empty
 }
 
-void VoidWriter::write_solver_name(const std::string& solver_name)
+void VoidWriter::write_master_solver(const std::string& solver_name)
+{
+    // keep this method empty
+}
+
+void VoidWriter::write_subproblem_solver(const std::string& solver_name)
 {
     // keep this method empty
 }

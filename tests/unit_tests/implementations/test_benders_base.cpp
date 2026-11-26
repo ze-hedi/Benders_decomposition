@@ -92,7 +92,8 @@ BendersBaseOptions DefaultOptions()
 {
     BendersBaseOptions options{SolverBaseOptions{}};
     options.MASTER_NAME = "master";
-    options.SOLVER_NAME = "HIGHS";
+    options.MASTER_SOLVER = SolverType::HIGHS;
+    options.SUBPROBLEM_SOLVER = SolverType::HIGHS;
     options.TIME_LIMIT = 1e6;
     options.SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_UNIFORM_CST_STR;
     return options;

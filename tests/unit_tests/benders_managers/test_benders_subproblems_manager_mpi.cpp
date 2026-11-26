@@ -38,7 +38,8 @@ protected:
 
         options_.INPUTROOT = input_dir_.string();
         options_.OUTPUTROOT = input_dir_.string();
-        options_.SOLVER_NAME = "GLOP";
+        options_.MASTER_SOLVER = SolverType::GLOP;
+        options_.SUBPROBLEM_SOLVER = SolverType::GLOP;
         options_.SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_UNIFORM_CST_STR;
 
         data_.control.nsubproblem = 3;

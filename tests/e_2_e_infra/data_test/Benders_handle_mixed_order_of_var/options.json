@@ -13,7 +13,8 @@
     "INPUTROOT": ".",
     "CSV_NAME": "benders_output_trace",
     "BOUND_ALPHA": true,
-    "SOLVER_NAME": "highs",
+    "MASTER_SOLVER": "highs",
+    "SUBPROBLEM_SOLVER": "highs",
     "JSON_FILE": "./expansion/out.json",
     "LAST_ITERATION_JSON_FILE": "./expansion/last_iteration.json"
 }

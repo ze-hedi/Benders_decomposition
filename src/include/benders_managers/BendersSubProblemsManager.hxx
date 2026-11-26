@@ -352,7 +352,7 @@ public:
     {
         return std::make_shared<SubproblemSolver>(GetSubproblemPath(kvp.first),
                                                   log_file_,
-                                                  SolverTypeFromString(options_.SOLVER_NAME),
+                                                  options_.SUBPROBLEM_SOLVER,
                                                   options_.LOG_LEVEL,
                                                   kvp.second,
                                                   SubproblemWeight(data_.control.nsubproblem,

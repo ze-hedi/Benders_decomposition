@@ -26,7 +26,8 @@ TEST(VoidWriterTest, EveryCallIsANoOp)
     EXPECT_NO_THROW({
         writer->initialize();
         writer->updateBeginTime();
-        writer->write_solver_name("GLOP");
+        writer->write_master_solver("HIGHS");
+        writer->write_subproblem_solver("GLOP");
         writer->write_master_name("master");
         writer->write_log_level(1);
         writer->write_nbweeks(5);

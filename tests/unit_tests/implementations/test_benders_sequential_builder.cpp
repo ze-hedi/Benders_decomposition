@@ -26,7 +26,7 @@ protected:
         study_ = fs::temp_directory_path()
                  / ("benders_sequential_builder_test_" + std::to_string(getpid()));
         fs::create_directories(study_);
-        Write(OPTIONS_FILE_NAME, R"({"SOLVER_NAME": "GLOP"})");
+        Write(OPTIONS_FILE_NAME, R"({"SUBPROBLEM_SOLVER": "GLOP"})");
         Write(STRUCTURE_FILE_NAME, "master x 0\nSP1.mps x 0\nSP2.mps x 0\n");
     }
 
@@ -50,7 +50,7 @@ TEST_F(BendersSequentialBuilderTest, BuildsSequentialWithStudyOptions)
 
     ASSERT_NE(benders, nullptr);
     EXPECT_EQ(benders->BendersName(), "Sequential");
-    EXPECT_EQ(benders->Options().SOLVER_NAME, "GLOP");
+    EXPECT_EQ(benders->Options().SUBPROBLEM_SOLVER, SolverType::GLOP);
     EXPECT_EQ(benders->Options().INPUTROOT, study_.string());
 }
 

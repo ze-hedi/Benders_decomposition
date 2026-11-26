@@ -112,24 +112,9 @@ math_opt::SolverType ToMathOptSolverType(SolverType solver_type)
 
 std::string SolverTypeToName(SolverType solver_type)
 {
-    switch (solver_type)
-    {
-    case SolverType::GLOP:
-        return "GLOP";
-    case SolverType::PDLP:
-        return "PDLP";
-    case SolverType::HIGHS:
-        return "HIGHS";
-    case SolverType::GSCIP:
-        return "GSCIP";
-    case SolverType::CP_SAT:
-        return "CP_SAT";
-    case SolverType::GUROBI:
-        return "GUROBI";
-    case SolverType::XPRESS:
-        return "XPRESS";
-    }
-    throw GenericSolverException("Unknown solver type");
+    std::ostringstream name;
+    name << solver_type;
+    return name.str();
 }
 } // namespace
 
@@ -139,18 +124,9 @@ SolverType SolverTypeFromString(const std::string& solver_name)
     std::ranges::transform(upper_name,
                            upper_name.begin(),
                            [](unsigned char c) { return std::toupper(c); });
-    for (auto solver_type: {SolverType::GLOP,
-                            SolverType::PDLP,
-                            SolverType::HIGHS,
-                            SolverType::GSCIP,
-                            SolverType::CP_SAT,
-                            SolverType::GUROBI,
-                            SolverType::XPRESS})
+    if (const auto it = SOLVER_TYPE_BY_NAME.find(upper_name); it != SOLVER_TYPE_BY_NAME.end())
     {
-        if (SolverTypeToName(solver_type) == upper_name)
-        {
-            return solver_type;
-        }
+        return it->second;
     }
     throw GenericSolverException("Unknown solver name '" + solver_name + "'");
 }

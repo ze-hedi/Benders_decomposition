@@ -65,10 +65,10 @@ TEST_F(BendersOptionsManagerTest, ReadsMinimalStudy)
 
 TEST_F(BendersOptionsManagerTest, OptionsAreApplied)
 {
-    Write(OPTIONS_FILE_NAME, R"({"SOLVER_NAME": "GLOP", "MAX_ITERATIONS": 10})");
+    Write(OPTIONS_FILE_NAME, R"({"SUBPROBLEM_SOLVER": "GLOP", "MAX_ITERATIONS": 10})");
     const BendersOptionsManager manager(study_);
 
-    EXPECT_EQ(manager.Options().SOLVER_NAME, "GLOP");
+    EXPECT_EQ(manager.Options().SUBPROBLEM_SOLVER, SolverType::GLOP);
     EXPECT_EQ(manager.Options().MAX_ITERATIONS, 10);
 }
 

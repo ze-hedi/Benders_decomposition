@@ -21,7 +21,8 @@ def study_path_is(context, study):
 @given('solver is "{solver}"')
 def set_solver(context, solver):
     context.solver = solver
-    update_option(context.tmp_study, "SOLVER_NAME", solver)
+    update_option(context.tmp_study, "MASTER_SOLVER", solver)
+    update_option(context.tmp_study, "SUBPROBLEM_SOLVER", solver)
 
 
 @given("the max iterations is {n:d}")

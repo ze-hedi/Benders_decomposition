@@ -13,20 +13,9 @@
 #include <vector>
 
 #include "ortools/math_opt/cpp/math_opt.h"
+#include "solvers/SolverType.h"
 
 namespace math_opt = ::operations_research::math_opt;
-
-// MathOpt backends available in our OR-Tools build.
-enum class SolverType
-{
-    GLOP,   // LP, linked
-    PDLP,   // LP, linked
-    HIGHS,  // LP + MIP, linked
-    GSCIP,  // MIP, linked
-    CP_SAT, // MIP, linked
-    GUROBI, // LP + MIP, loaded at runtime (dlopen)
-    XPRESS, // LP + MIP, loaded at runtime (dlopen)
-};
 
 /*************************************************************************************************
 -----------------------------------    Exceptions

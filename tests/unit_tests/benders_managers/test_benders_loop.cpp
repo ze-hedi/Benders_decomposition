@@ -70,7 +70,8 @@ protected:
 
         options_.INPUTROOT = input_dir_.string();
         options_.OUTPUTROOT = input_dir_.string();
-        options_.SOLVER_NAME = "GLOP";
+        options_.MASTER_SOLVER = SolverType::GLOP;
+        options_.SUBPROBLEM_SOLVER = SolverType::GLOP;
         options_.SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_UNIFORM_CST_STR;
         options_.SEPARATION_PARAM = 1.0;
         options_.RELAXED_GAP = 1e-2;

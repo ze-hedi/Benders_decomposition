@@ -59,7 +59,8 @@ TEST(OptionsReaderTest, EmptyObjectGivesDefaults)
 
     EXPECT_TRUE(warnings.empty());
     EXPECT_EQ(options.MASTER_NAME, defaults.MASTER_NAME);
-    EXPECT_EQ(options.SOLVER_NAME, defaults.SOLVER_NAME);
+    EXPECT_EQ(options.MASTER_SOLVER, defaults.MASTER_SOLVER);
+    EXPECT_EQ(options.SUBPROBLEM_SOLVER, defaults.SUBPROBLEM_SOLVER);
     EXPECT_DOUBLE_EQ(options.SEPARATION_PARAM, defaults.SEPARATION_PARAM);
     EXPECT_DOUBLE_EQ(options.RELATIVE_GAP, defaults.RELATIVE_GAP);
     EXPECT_EQ(options.TRACE, defaults.TRACE);
@@ -96,7 +97,8 @@ TEST(OptionsReaderTest, EveryKeyIsApplied)
     const auto [o, warnings] = Read(R"({
         "LOG_LEVEL": 2,
         "MASTER_NAME": "my_master",
-        "SOLVER_NAME": "glop",
+        "MASTER_SOLVER": "glop",
+        "SUBPROBLEM_SOLVER": "xpress",
         "OUTPUTROOT": "out",
         "MAX_ITERATIONS": 50,
         "TIME_LIMIT": 3600,
@@ -124,7 +126,8 @@ TEST(OptionsReaderTest, EveryKeyIsApplied)
     EXPECT_TRUE(warnings.empty());
     EXPECT_EQ(o.LOG_LEVEL, 2);
     EXPECT_EQ(o.MASTER_NAME, "my_master");
-    EXPECT_EQ(o.SOLVER_NAME, "GLOP");
+    EXPECT_EQ(o.MASTER_SOLVER, SolverType::GLOP);
+    EXPECT_EQ(o.SUBPROBLEM_SOLVER, SolverType::XPRESS);
     EXPECT_EQ(o.OUTPUTROOT, (INPUT_ROOT / "out").string());
     EXPECT_EQ(o.MAX_ITERATIONS, 50);
     EXPECT_DOUBLE_EQ(o.TIME_LIMIT, 3600);
@@ -184,12 +187,74 @@ TEST(OptionsReaderTest, WrongTypeThrows)
     EXPECT_NE(ErrorOf(R"({"MASTER_NAME": 3})").find("MASTER_NAME"), std::string::npos);
 }
 
+// Every name, for the role where the solver is accepted
+TEST(OptionsReaderTest, EverySolverNameIsRead)
+{
+    for (const auto& [name, solver_type]: SOLVER_TYPE_BY_NAME)
+    {
+        if (SolvesMip(solver_type))
+        {
+            EXPECT_EQ(Read(R"({"MASTER_SOLVER": ")" + name + R"("})").options.MASTER_SOLVER,
+                      solver_type)
+              << name;
+        }
+        if (GivesDualsAndBasis(solver_type))
+        {
+            EXPECT_EQ(Read(R"({"SUBPROBLEM_SOLVER": ")" + name + R"("})").options.SUBPROBLEM_SOLVER,
+                      solver_type)
+              << name;
+        }
+    }
+    EXPECT_EQ(Read(R"({"MASTER_SOLVER": "cp_sat"})").options.MASTER_SOLVER, SolverType::CP_SAT);
+}
+
+TEST(OptionsReaderTest, SolversAreReadIndependently)
+{
+    const auto options = Read(R"({"MASTER_SOLVER": "gscip", "SUBPROBLEM_SOLVER": "glop"})").options;
+
+    EXPECT_EQ(options.MASTER_SOLVER, SolverType::GSCIP);
+    EXPECT_EQ(options.SUBPROBLEM_SOLVER, SolverType::GLOP);
+}
+
+TEST(OptionsReaderTest, LpOnlyMasterSolverNeedsRelaxedMaster)
+{
+    EXPECT_NE(ErrorOf(R"({"MASTER_SOLVER": "glop"})").find("MASTER_SOLVER"), std::string::npos);
+    EXPECT_NE(ErrorOf(R"({"MASTER_SOLVER": "pdlp"})").find("MASTER_SOLVER"), std::string::npos);
+    // Whatever the order of the keys
+    EXPECT_EQ(ErrorOf(R"({"MASTER_SOLVER": "glop", "MASTER_FORMULATION": "relaxed"})"), "");
+    EXPECT_EQ(ErrorOf(R"({"MASTER_FORMULATION": "relaxed", "MASTER_SOLVER": "pdlp"})"), "");
+}
+
+TEST(OptionsReaderTest, SubproblemSolverWithoutDualsOrBasisThrows)
+{
+    EXPECT_NE(ErrorOf(R"({"SUBPROBLEM_SOLVER": "cp_sat"})").find("SUBPROBLEM_SOLVER"),
+              std::string::npos);
+    EXPECT_NE(ErrorOf(R"({"SUBPROBLEM_SOLVER": "pdlp"})").find("SUBPROBLEM_SOLVER"),
+              std::string::npos);
+}
+
+TEST(OptionsReaderTest, GscipSubproblemSolverWarns)
+{
+    const auto warnings = Read(R"({"SUBPROBLEM_SOLVER": "gscip"})").warnings;
+
+    ASSERT_EQ(warnings.size(), 1u);
+    EXPECT_NE(warnings[0].find("SUBPROBLEM_SOLVER"), std::string::npos);
+}
+
+// xpansion's single solver option is replaced by MASTER_SOLVER and SUBPROBLEM_SOLVER
+TEST(OptionsReaderTest, SolverNameIsUnknown)
+{
+    EXPECT_NE(ErrorOf(R"({"SOLVER_NAME": "highs"})").find("unknown option"), std::string::npos);
+}
+
 TEST(OptionsReaderTest, BadEnumValueThrows)
 {
     EXPECT_NE(ErrorOf(R"({"MASTER_FORMULATION": "foo"})").find("MASTER_FORMULATION"),
               std::string::npos);
     EXPECT_NE(ErrorOf(R"({"RESTART_MODE": "warm"})").find("RESTART_MODE"), std::string::npos);
-    EXPECT_NE(ErrorOf(R"({"SOLVER_NAME": "COIN"})").find("SOLVER_NAME"), std::string::npos);
+    EXPECT_NE(ErrorOf(R"({"MASTER_SOLVER": "COIN"})").find("MASTER_SOLVER"), std::string::npos);
+    EXPECT_NE(ErrorOf(R"({"SUBPROBLEM_SOLVER": "COIN"})").find("SUBPROBLEM_SOLVER"),
+              std::string::npos);
 }
 
 TEST(OptionsReaderTest, CompactCacheIsRejected)

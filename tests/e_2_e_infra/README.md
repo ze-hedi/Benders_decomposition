@@ -72,7 +72,8 @@ Keys mirror `BendersBaseOptions` (see
 | `OUTPUTROOT`       | output directory (usually `./output/`)    |
 | `MASTER_NAME`      | master problem base name                  |
 | `STRUCTURE_FILE`   | structure file listing master/subproblems |
-| `SOLVER_NAME`      | LP/MIP solver (`glop`, `highs`, ...)      |
+| `MASTER_SOLVER`    | master MIP solver (`highs`, `gscip`, ...) |
+| `SUBPROBLEM_SOLVER` | subproblem LP solver (`glop`, `highs`, ...) |
 | `MAX_ITERATIONS`   | Benders iteration limit (-1 = unlimited)  |
 | `BATCH_SIZE`       | cuts per iteration (0 = one per sub)      |
 | `RESTART_MODE`     | `cold_start` / `resume` / `hot_start`     |
@@ -120,9 +121,9 @@ stripped:
 
 Compatibility changes vs upstream:
 
-- `SOLVER_NAME` normalized to `highs` (upstream used `Xpress`/`COIN`, both
-  unavailable here); `mini_instance_LP/MIP` have no `SOLVER_NAME` key at all —
-  the CLI must default it
+- Upstream's single `SOLVER_NAME` is replaced by `MASTER_SOLVER` and
+  `SUBPROBLEM_SOLVER`, both set to `highs` (upstream used `Xpress`/`COIN`);
+  `mini_instance_LP/MIP` set no solver at all — both default to HiGHS
 - `benders_aggreg_cuts.feature`: MPI Examples rows (procs 3/5) dropped, this
   port is sequential only
 - Not ported: micro-iteration studies/features (`ieee96_micro_it*`,

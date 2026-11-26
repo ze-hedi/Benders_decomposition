@@ -63,7 +63,8 @@ protected:
         options_.INPUTROOT = study_.string();
         options_.OUTPUTROOT = study_.string();
         options_.LAST_ITERATION_JSON_FILE = (study_ / "last_iteration.json").string();
-        options_.SOLVER_NAME = "HIGHS";
+        options_.MASTER_SOLVER = SolverType::HIGHS;
+        options_.SUBPROBLEM_SOLVER = SolverType::HIGHS;
         options_.SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_UNIFORM_CST_STR;
         options_.SEPARATION_PARAM = 1.0;
         options_.ABSOLUTE_GAP = 1e-6;
@@ -214,6 +215,14 @@ TEST_F(BendersMpiTest, PerSubCache_ConvergesToMipOptimum)
 TEST_F(BendersMpiTest, SeparationParameter_ConvergesToMipOptimum)
 {
     options_.SEPARATION_PARAM = 0.5;
+    expect_mip_optimum();
+}
+
+// Each role runs its own solver: a MIP solver for the master, a simplex for the subproblems
+TEST_F(BendersMpiTest, DifferentMasterAndSubproblemSolvers_ConvergesToMipOptimum)
+{
+    options_.MASTER_SOLVER = SolverType::GSCIP;
+    options_.SUBPROBLEM_SOLVER = SolverType::GLOP;
     expect_mip_optimum();
 }
 

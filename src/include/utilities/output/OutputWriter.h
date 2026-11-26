@@ -21,7 +21,8 @@ const std::string BENDERS_DECOMPOSITION_C("benders_decomposition"), VERSION_C("v
   ITERATION_C("iteration"), PROBLEM_STATUS_C("problem_status"), OPTIMAL_C("OPTIMAL"),
   LIMIT_REACHED_C("limit reached"), ERROR_C("ERROR"), VALUES_C("values"),
   STOPPING_CRITERION_C("stopping_criterion"), MASTER_NAME_C("MASTER_NAME"),
-  LOG_LEVEL_C("LOG_LEVEL"), SOLVER_NAME_C("SOLVER_NAME"), PROBLEMNAME_C("problem_name"),
+  LOG_LEVEL_C("LOG_LEVEL"), MASTER_SOLVER_C("MASTER_SOLVER"),
+  SUBPROBLEM_SOLVER_C("SUBPROBLEM_SOLVER"), PROBLEMNAME_C("problem_name"),
   PROBLEMPATH_C("problem_path"),
   CUMULATIVE_NUMBER_OF_SUBPROBLEM_RESOLVED_C("cumulative_number_of_subproblem_resolutions"),
   PROBLEM_FORMAT_C{"PROBLEM_FORMAT"};
@@ -126,7 +127,8 @@ public:
 
     virtual void end_writing(const IterationsData& iterations_data) = 0;
 
-    virtual void write_solver_name(const std::string& solver_name) = 0;
+    virtual void write_master_solver(const std::string& solver_name) = 0;
+    virtual void write_subproblem_solver(const std::string& solver_name) = 0;
     virtual void write_master_name(const std::string& master_name) = 0;
     virtual void write_log_level(const int log_level) = 0;
     virtual void write_solution(const SolutionData& solution) = 0;

@@ -47,7 +47,8 @@ protected:
 
         options_.INPUTROOT = input_dir_.string();
         options_.OUTPUTROOT = input_dir_.string();
-        options_.SOLVER_NAME = "GLOP";
+        options_.MASTER_SOLVER = SolverType::GLOP;
+        options_.SUBPROBLEM_SOLVER = SolverType::GLOP;
         options_.SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_UNIFORM_CST_STR;
 
         data_.control.nsubproblem = 2;
@@ -226,13 +227,6 @@ TEST_F(BendersSubProblemsManagerTest, MakeSubproblemSolver_ScalesObjectiveByWeig
     PlainData::SubProblemData subproblem_data;
     manager->SolveSubproblem(subproblem_data, "sub1.mps", worker, nullptr);
     EXPECT_DOUBLE_EQ(subproblem_data.subproblem_cost, 18.0); // 3 * (2 * 3)
-}
-
-TEST_F(BendersSubProblemsManagerTest, MakeSubproblemSolver_UnknownSolverName_Throws)
-{
-    options_.SOLVER_NAME = "unknown";
-    auto manager = make_manager();
-    EXPECT_THROW(manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}}), GenericSolverException);
 }
 
 // ---------------------------------------------------------------------------

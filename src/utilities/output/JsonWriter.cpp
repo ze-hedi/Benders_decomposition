@@ -173,9 +173,14 @@ void JsonWriter::end_writing(const IterationsData& iterations_data)
     dump();
 }
 
-void JsonWriter::write_solver_name(const std::string& solver_name)
+void JsonWriter::write_master_solver(const std::string& solver_name)
 {
-    _output[OPTIONS_C][SOLVER_NAME_C] = solver_name;
+    _output[OPTIONS_C][MASTER_SOLVER_C] = solver_name;
+}
+
+void JsonWriter::write_subproblem_solver(const std::string& solver_name)
+{
+    _output[OPTIONS_C][SUBPROBLEM_SOLVER_C] = solver_name;
 }
 
 void JsonWriter::write_master_name(const std::string& master_name)

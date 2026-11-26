@@ -77,8 +77,10 @@ TEST(BendersBaseOptionsTest, KeepsBaseOptionsAndDefaults)
 
     EXPECT_EQ(options.OUTPUTROOT, "out");
     EXPECT_EQ(options.MASTER_NAME, "master");
+    EXPECT_EQ(options.SOLVER_NAME, "HIGHS");
     EXPECT_EQ(options.MAX_ITERATIONS, -1);
     EXPECT_EQ(options.RESTART_MODE, RestartMode::COLD_START);
-    EXPECT_FALSE(options.TRACE);
-    EXPECT_FALSE(options.EXTERNAL_LOOP_OPTIONS.DO_OUTER_LOOP);
+    EXPECT_DOUBLE_EQ(options.SEPARATION_PARAM, 0.5);
+    EXPECT_TRUE(options.TRACE);
+    EXPECT_TRUE(options.BOUND_ALPHA);
 }

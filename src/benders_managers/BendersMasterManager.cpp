@@ -137,18 +137,9 @@ void BendersMasterManager::ActivateIntegrityConstraints() const
 }
 
 std::filesystem::path BendersMasterManager::GetMasterPath(const std::string& input_root,
-                                                          const std::string& master_name,
-                                                          ProblemFormat format,
-                                                          SolverType solver_type) const
+                                                          const std::string& master_name) const
 {
-    if (format == ProblemFormat::OPTIMIZED && solver_type == SolverType::XPRESS)
-    {
-        return std::filesystem::path(input_root) / (master_name + SAVE_SUFFIX);
-    }
-    else
-    {
-        return std::filesystem::path(input_root) / (master_name + MPS_SUFFIX);
-    }
+    return std::filesystem::path(input_root) / (master_name + MPS_SUFFIX);
 }
 
 void BendersMasterManager::WriteBasis(const std::filesystem::path& filename) const

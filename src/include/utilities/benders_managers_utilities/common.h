@@ -14,7 +14,6 @@ using Str2Dbl = std::map<std::string, double>;
 using CouplingMap = std::map<std::string, VariableMap>;
 
 inline const std::string MPS_SUFFIX = ".mps";
-inline const std::string SAVE_SUFFIX = ".svf";
 
 inline const std::string SUBPROBLEM_WEIGHT_CST_STR = "CONSTANT";
 inline const std::string SUBPROBLEM_WEIGHT_UNIFORM_CST_STR = "UNIFORM";
@@ -69,12 +68,6 @@ enum class CacheProblems
     COMPACT
 };
 
-enum class ProblemFormat
-{
-    MPS_FILE,
-    OPTIMIZED
-};
-
 /*!
  *  \brief Return the distance between two points using the 2-norm
  */
@@ -85,17 +78,16 @@ double norm_point(const Point& x0, const Point& x1);
  */
 Json::Value get_json_file_content(const std::filesystem::path& json_file);
 
+// Defaults follow xpansion's SimulationOptions, except SOLVER_NAME (only GLOP/HiGHS exist here).
+// INPUTROOT is not read from the options file: it is set by whoever loads the study.
 struct BaseOptions
 {
     int LOG_LEVEL = 0;
 
     std::string INPUTROOT;
     std::string OUTPUTROOT;
-    std::string STRUCTURE_FILE;
-    std::string MASTER_NAME;
-    std::string SOLVER_NAME;
-
-    ProblemFormat PROBLEM_FORMAT = ProblemFormat::MPS_FILE;
+    std::string MASTER_NAME = "master";
+    std::string SOLVER_NAME = "HIGHS";
 };
 
 struct SolverBaseOptions: public BaseOptions
@@ -107,19 +99,15 @@ struct SolverBaseOptions: public BaseOptions
     {
     }
 
-    std::string SLAVE_WEIGHT;
-    double SLAVE_WEIGHT_VALUE = 0;
+    std::string SLAVE_WEIGHT = SUBPROBLEM_WEIGHT_CST_STR;
+    double SLAVE_WEIGHT_VALUE = 1;
     Str2Dbl weights;
-};
-
-struct ExternalLoopOptions
-{
-    bool DO_OUTER_LOOP = false;
-    std::string OUTER_LOOP_OPTION_FILE;
 };
 
 struct BendersBaseOptions: public SolverBaseOptions
 {
+    BendersBaseOptions() = default;
+
     explicit BendersBaseOptions(const SolverBaseOptions& other):
         SolverBaseOptions(other)
     {
@@ -127,30 +115,25 @@ struct BendersBaseOptions: public SolverBaseOptions
 
     int MAX_ITERATIONS = -1;
 
-    double ABSOLUTE_GAP = 0;
-    double RELATIVE_GAP = 0;
-    double RELAXED_GAP = 0;
-    double TIME_LIMIT = 0;
-    double SEPARATION_PARAM = 1;
+    double ABSOLUTE_GAP = 1;
+    double RELATIVE_GAP = 1e-6;
+    double RELAXED_GAP = 1e-5;
+    double TIME_LIMIT = 1e12;
+    double SEPARATION_PARAM = 0.5;
     double MASTER_SOLUTION_TOLERANCE = 1e-4;
     double CUT_COEFFICIENT_TOLERANCE = 5e-3;
 
     RestartMode RESTART_MODE = RestartMode::COLD_START;
-    bool MICRO_ITERATIONS = false;
     int NB_CUTS_PER_ITER = 0;
-    bool TRACE = false;
-    bool BOUND_ALPHA = false;
+    bool TRACE = true;
+    bool BOUND_ALPHA = true;
     CacheProblems CACHE_PROBLEMS = CacheProblems::NO_CACHE;
 
     MasterFormulation MASTER_FORMULATION = MasterFormulation::INTEGER;
 
-    std::string AREA_FILE;
-    std::string CSV_NAME;
-    std::string LAST_MASTER_MPS;
-    std::string LAST_MASTER_BASIS;
-    std::string LAST_ITERATION_JSON_FILE;
-
-    std::size_t BATCH_SIZE = 0;
-
-    ExternalLoopOptions EXTERNAL_LOOP_OPTIONS;
+    std::string CSV_NAME = "benders_output_trace";
+    std::string JSON_FILE = "out.json";
+    std::string LAST_ITERATION_JSON_FILE = "last_iteration.json";
+    std::string LAST_MASTER_MPS = "master_last_iteration";
+    std::string LAST_MASTER_BASIS = "master_last_basis";
 };

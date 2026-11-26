@@ -36,7 +36,7 @@ using PostSolveHook = std::function<
  *   - MakeCacheBeginHookImpl(Args...) — same for the cache mode
  *
  * Unlike xpansion, there is no plugin (so no micro-iterations) and no skeleton mode
- * (CacheProblems::COMPACT): both are rejected at construction.
+ * (CacheProblems::COMPACT): the latter is rejected at construction.
  */
 template<typename Derived>
 class BendersSubProblemsManager
@@ -62,7 +62,7 @@ protected:
 
 public:
     /**
-     * @throws std::invalid_argument if options ask for micro-iterations or the skeleton mode
+     * @throws std::invalid_argument if options ask for the skeleton mode
      */
     BendersSubProblemsManager(CurrentIterationData& data,
                               const BendersBaseOptions& options,
@@ -77,10 +77,6 @@ public:
         log_file_(std::move(log_file)),
         writer_(std::move(writer))
     {
-        if (options_.MICRO_ITERATIONS)
-        {
-            throw std::invalid_argument("Micro-iterations are not supported");
-        }
         if (options_.CACHE_PROBLEMS == CacheProblems::COMPACT)
         {
             throw std::invalid_argument("CacheProblems::COMPACT is not supported");
@@ -197,7 +193,7 @@ public:
     // ---------------------------------------------------------------
 
     // Subproblems are solved with Derived::EXECUTION_POLICY. xpansion falls back to a sequential
-    // loop for micro-iterations, which are rejected at construction here.
+    // loop for micro-iterations, which do not exist here.
     template<typename It, typename F>
     void ForEachSubproblem(It first, It last, F&& f)
     {

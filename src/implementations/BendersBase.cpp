@@ -308,10 +308,7 @@ double BendersBase::SubproblemWeight(int subproblem_count, const std::string& na
 
 std::filesystem::path BendersBase::get_master_path() const
 {
-    return master_manager_.GetMasterPath(_options.INPUTROOT,
-                                         _options.MASTER_NAME,
-                                         _options.PROBLEM_FORMAT,
-                                         SolverTypeFromString(_options.SOLVER_NAME));
+    return master_manager_.GetMasterPath(_options.INPUTROOT, _options.MASTER_NAME);
 }
 
 void BendersBase::set_solver_log_file(const std::filesystem::path& log_file)

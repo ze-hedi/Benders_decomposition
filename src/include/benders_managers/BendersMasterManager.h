@@ -64,9 +64,7 @@ public:
 
     // Paths
     [[nodiscard]] std::filesystem::path GetMasterPath(const std::string& input_root,
-                                                      const std::string& master_name,
-                                                      ProblemFormat format,
-                                                      SolverType solver_type) const;
+                                                      const std::string& master_name) const;
     void WriteBasis(const std::filesystem::path& filename) const;
 
     // Solving (mixed — reads/writes CurrentIterationData)

@@ -112,12 +112,6 @@ TEST_F(BendersSubProblemsManagerTest, Constructor_NoWorkerCreated)
     EXPECT_TRUE(manager->GetSubProblemNames().empty());
 }
 
-TEST_F(BendersSubProblemsManagerTest, Constructor_MicroIterations_Throws)
-{
-    options_.MICRO_ITERATIONS = true;
-    EXPECT_THROW(make_manager(), std::invalid_argument);
-}
-
 TEST_F(BendersSubProblemsManagerTest, Constructor_CompactCache_Throws)
 {
     options_.CACHE_PROBLEMS = CacheProblems::COMPACT;

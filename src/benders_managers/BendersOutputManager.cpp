@@ -164,15 +164,12 @@ void BendersOutputManager::print_master_csv(std::ostream& stream,
 
 void BendersOutputManager::SaveCurrentIterationInOutputFile() const
 {
-    if (!options_.EXTERNAL_LOOP_OPTIONS.DO_OUTER_LOOP)
+    const auto& LastWorkerMasterData = relevant_iteration_data_.last;
+    if (LastWorkerMasterData._valid)
     {
-        const auto& LastWorkerMasterData = relevant_iteration_data_.last;
-        if (LastWorkerMasterData._valid)
-        {
-            writer_->write_iteration(iteration(LastWorkerMasterData),
-                                     data_.control.it + iterations_before_resume_);
-            writer_->dump();
-        }
+        writer_->write_iteration(iteration(LastWorkerMasterData),
+                                 data_.control.it + iterations_before_resume_);
+        writer_->dump();
     }
 }
 
@@ -182,14 +179,11 @@ void BendersOutputManager::SaveSolutionInOutputFile() const
     writer_->dump();
 }
 
-void BendersOutputManager::EndWritingInOutputFile(double benders_time, bool do_outer_loop)
+void BendersOutputManager::EndWritingInOutputFile(double benders_time)
 {
     writer_->updateEndTime();
     writer_->write_duration(benders_time);
-    if (!do_outer_loop)
-    {
-        SaveSolutionInOutputFile();
-    }
+    SaveSolutionInOutputFile();
 }
 
 void BendersOutputManager::PostRunActions(StoppingCriterion stopping_criterion)

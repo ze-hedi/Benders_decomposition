@@ -225,39 +225,9 @@ TEST_F(BendersMasterManagerTest, CreateMaster_SetsVariableMap)
 // GetMasterPath
 // ---------------------------------------------------------------------------
 
-TEST_F(BendersMasterManagerTest, GetMasterPath_MPS_Format)
+TEST_F(BendersMasterManagerTest, GetMasterPath_IsMpsUnderInputRoot)
 {
-    auto path = manager_.GetMasterPath("/input",
-                                       "master",
-                                       ProblemFormat::MPS_FILE,
-                                       SolverType::HIGHS);
-    ASSERT_EQ(path, fs::path("/input/master.mps"));
-}
-
-TEST_F(BendersMasterManagerTest, GetMasterPath_MPS_Format_Xpress)
-{
-    auto path = manager_.GetMasterPath("/input",
-                                       "master",
-                                       ProblemFormat::MPS_FILE,
-                                       SolverType::XPRESS);
-    ASSERT_EQ(path, fs::path("/input/master.mps"));
-}
-
-TEST_F(BendersMasterManagerTest, GetMasterPath_Optimized_Xpress)
-{
-    auto path = manager_.GetMasterPath("/input",
-                                       "master",
-                                       ProblemFormat::OPTIMIZED,
-                                       SolverType::XPRESS);
-    ASSERT_EQ(path, fs::path("/input/master.svf"));
-}
-
-TEST_F(BendersMasterManagerTest, GetMasterPath_Optimized_NonXpress_FallsBackToMPS)
-{
-    auto path = manager_.GetMasterPath("/input",
-                                       "master",
-                                       ProblemFormat::OPTIMIZED,
-                                       SolverType::HIGHS);
+    auto path = manager_.GetMasterPath("/input", "master");
     ASSERT_EQ(path, fs::path("/input/master.mps"));
 }
 

@@ -416,31 +416,20 @@ TEST_F(BendersOutputManagerTest, StatusFromCriterion_Empty_IsError)
 //  EndWritingInOutputFile
 // ═══════════════════════════════════════════════════════════
 
-TEST_F(BendersOutputManagerTest, EndWriting_WithoutOuterLoop_WritesSolution)
+TEST_F(BendersOutputManagerTest, EndWriting_WritesSolution)
 {
     auto mgr = MakeManager();
     SetupValidWorkerMasterData(relevant_data_.best);
     data_.control.best_ub = 100.0;
     data_.master.lb = 90.0;
 
-    mgr->EndWritingInOutputFile(42.0, false);
+    mgr->EndWritingInOutputFile(42.0);
 
     ASSERT_EQ(writer_->update_end_time_calls, 1);
     ASSERT_EQ(writer_->write_duration_calls, 1);
     ASSERT_EQ(writer_->last_duration, 42.0);
     ASSERT_EQ(writer_->write_solution_calls, 1);
     ASSERT_EQ(writer_->dump_calls, 1);
-}
-
-TEST_F(BendersOutputManagerTest, EndWriting_WithOuterLoop_SkipsSolution)
-{
-    auto mgr = MakeManager();
-
-    mgr->EndWritingInOutputFile(42.0, true);
-
-    ASSERT_EQ(writer_->update_end_time_calls, 1);
-    ASSERT_EQ(writer_->write_duration_calls, 1);
-    ASSERT_EQ(writer_->write_solution_calls, 0);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -686,19 +675,6 @@ TEST_F(BendersOutputManagerSaveTest, SaveCurrentBendersData_WritesResumeFileAndI
     ASSERT_EQ(last.it, 2);
     ASSERT_DOUBLE_EQ(last.lb, 42.0);
     ASSERT_FALSE(std::filesystem::exists(output_dir_ / "test_trace.csv"));
-}
-
-TEST_F(BendersOutputManagerSaveTest, SaveCurrentBendersData_WithOuterLoop_SkipsWriter)
-{
-    options_.EXTERNAL_LOOP_OPTIONS.DO_OUTER_LOOP = true;
-    data_.control.it = 1;
-    SetupValidWorkerMasterData(relevant_data_.last);
-    auto mgr = MakeManager();
-
-    mgr->SaveCurrentBendersData(output_dir_ / "last_iteration.json", false);
-
-    ASSERT_EQ(writer_->write_iteration_calls, 0);
-    ASSERT_TRUE(std::filesystem::exists(output_dir_ / "last_iteration.json"));
 }
 
 TEST_F(BendersOutputManagerSaveTest, SaveCurrentBendersData_InvalidLastIteration_SkipsWriter)

@@ -32,7 +32,7 @@ public:
     void SaveCurrentBendersData(const std::filesystem::path& last_iteration_file, bool trace);
 
     // End of run
-    void EndWritingInOutputFile(double benders_time, bool do_outer_loop);
+    void EndWritingInOutputFile(double benders_time);
     void PostRunActions(StoppingCriterion stopping_criterion);
 
     // MathLogger

@@ -186,7 +186,6 @@ SolverMathOpt::SolverMathOpt(const SolverMathOpt& other):
         _log_stream.open(_log_file, std::ofstream::out | std::ofstream::app);
         add_stream(_log_stream);
     }
-    _minimize = other._minimize;
     _log_level = other._log_level;
     args_.parameters = other.args_.parameters;
 
@@ -207,13 +206,13 @@ SolverMathOpt::SolverMathOpt(const SolverMathOpt& other):
     }
 
     // Copy objective
-    if (other._minimize)
+    if (other._model->is_maximize())
     {
-        _model->set_minimize();
+        _model->set_maximize();
     }
     else
     {
-        _model->set_maximize();
+        _model->set_minimize();
     }
     for (size_t i = 0; i < other._variables.size(); ++i)
     {
@@ -279,7 +278,6 @@ void SolverMathOpt::init()
     _initial_basis.reset();
     _col_name_to_index.clear();
     _row_name_to_index.clear();
-    _minimize = true;
 }
 
 void SolverMathOpt::free()
@@ -950,19 +948,6 @@ void SolverMathOpt::chg_obj(const std::vector<int>& mindex, const std::vector<do
     }
 }
 
-void SolverMathOpt::chg_obj_direction(bool minimize)
-{
-    _minimize = minimize;
-    if (minimize)
-    {
-        _model->set_minimize();
-    }
-    else
-    {
-        _model->set_maximize();
-    }
-}
-
 void SolverMathOpt::chg_bounds(const std::vector<int>& mindex,
                                const std::vector<char>& qbtype,
                                const std::vector<double>& bnd)
@@ -1490,7 +1475,6 @@ void SolverMathOpt::rebuild_from_model()
         }
     }
 
-    _minimize = !_model->is_maximize();
 
     rebuild_index_maps();
 }

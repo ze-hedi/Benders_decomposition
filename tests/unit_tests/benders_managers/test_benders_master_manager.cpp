@@ -19,6 +19,8 @@
 // ===========================================================================
 
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -170,8 +172,9 @@ TEST_F(BendersMasterManagerTest, CreateMaster_SetsNotEmpty)
 TEST_F(BendersMasterManagerTest, CreateMaster_AddsAlphaColumns)
 {
     create_small_master();
-    EXPECT_EQ(manager_.Master()->solver().get_col_names(),
-              (std::vector<std::string>{"x", "alpha", "alpha_0"}));
+    EXPECT_EQ(manager_.GetNcols(), 3);
+    EXPECT_EQ(manager_.Master()->alpha_id(), 1);
+    EXPECT_EQ(manager_.Master()->subproblem_alpha_ids(), (std::vector<int>{2}));
 }
 
 TEST_F(BendersMasterManagerTest, FreeMaster_SetsEmpty)
@@ -322,7 +325,13 @@ TEST_F(BendersMasterManagerTest, AddRows_AddsRow)
     const int row = manager_.GetNrows();
 
     // x >= 2
-    manager_.AddRows({'G'}, {2.0}, {}, {0, 1}, {0}, {1.0});
+    solver_utils::ConstraintsToAdd rows;
+    rows.qrtype = {'G'};
+    rows.rhs = {2.0};
+    rows.mstart = {0, 1};
+    rows.mclind = {0};
+    rows.dmatval = {1.0};
+    manager_.AddRows(rows);
 
     ASSERT_EQ(manager_.GetNrows(), row + 1);
     EXPECT_EQ(manager_.GetRowType(row, row), (std::vector<char>{'G'}));
@@ -337,9 +346,23 @@ TEST_F(BendersMasterManagerTest, AddRows_WithNames_NamesRows)
     create_small_master();
     const int row = manager_.GetNrows();
 
-    manager_.AddRows({'G'}, {2.0}, {}, {0, 1}, {0}, {1.0}, {"floor"});
+    solver_utils::ConstraintsToAdd rows;
+    rows.qrtype = {'G'};
+    rows.rhs = {2.0};
+    rows.mstart = {0, 1};
+    rows.mclind = {0};
+    rows.dmatval = {1.0};
+    rows.row_names = {"floor"};
+    manager_.AddRows(rows);
 
-    EXPECT_EQ(manager_.Master()->row_index("floor"), row);
+    // MasterSolver has no row lookup by name: the name is read back from the written model
+    ASSERT_EQ(manager_.GetNrows(), row + 1);
+    const auto written = output_dir_ / "named_rows.mps";
+    manager_.Master()->write_problem(written);
+    std::ifstream file(written);
+    const std::string content((std::istreambuf_iterator<char>(file)),
+                              std::istreambuf_iterator<char>());
+    EXPECT_NE(content.find("floor"), std::string::npos);
 }
 
 TEST_F(BendersMasterManagerTest, GetRowsCoeffs_ReturnsRowEntries)
@@ -512,7 +535,7 @@ TEST_F(BendersMasterManagerTest, SolveMaster_BoundAlpha_CapsAlphaAtBestUb)
     solve(data, true);
 
     const int alpha = manager_.Master()->alpha_id();
-    EXPECT_EQ(manager_.Master()->solver().get_ub(alpha, alpha), (std::vector<double>{42.0}));
+    EXPECT_DOUBLE_EQ(manager_.Master()->get_ub()[alpha], 42.0);
 }
 
 TEST_F(BendersMasterManagerTest, SolveMaster_NoBoundAlpha_LeavesAlphaUnbounded)
@@ -525,7 +548,7 @@ TEST_F(BendersMasterManagerTest, SolveMaster_NoBoundAlpha_LeavesAlphaUnbounded)
     solve(data, false);
 
     const int alpha = manager_.Master()->alpha_id();
-    EXPECT_GE(manager_.Master()->solver().get_ub(alpha, alpha)[0], 1e20);
+    EXPECT_GE(manager_.Master()->get_ub()[alpha], 1e20);
 }
 
 TEST_F(BendersMasterManagerTest, SolveMaster_WritesLastMaster)

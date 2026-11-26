@@ -1,6 +1,7 @@
 add_executable(test_linear_solvers
         solvers/test_linear_solvers.cpp
         solvers/test_linear_solvers_getters.cpp
+        solvers/test_master_solver.cpp
 )
 
 target_link_libraries(test_linear_solvers PRIVATE
@@ -19,7 +20,6 @@ add_executable(test_workers
         workers/test_cut.cpp
         workers/test_worker.cpp
         workers/test_subproblem_worker.cpp
-        workers/test_worker_master.cpp
 )
 
 target_link_libraries(test_workers PRIVATE
@@ -202,4 +202,25 @@ if(BUILD_MPI)
     )
 
     add_mpi_test(test_benders_cuts_manager_mpi 2)
+endif()
+
+if(BUILD_MPI)
+    add_executable(test_benders_mpi
+            mpi/test_benders_mpi.cpp
+    )
+
+    target_include_directories(test_benders_mpi PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+    target_link_libraries(test_benders_mpi PRIVATE
+            benders_mpi
+            GTest::gtest
+    )
+
+    target_compile_definitions(test_benders_mpi PRIVATE
+            TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
+    )
+
+    # 2 processes: uneven split (2 + 1 subproblems); 4: more processes than subproblems
+    add_mpi_test(test_benders_mpi 2)
+    add_mpi_test(test_benders_mpi 4)
 endif()

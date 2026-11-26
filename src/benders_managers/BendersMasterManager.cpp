@@ -17,15 +17,19 @@ void BendersMasterManager::CreateMaster(
   double master_solution_tolerance,
   const std::map<int, double>& subproblem_cut_coefficient_tolerance)
 {
-    master_ = std::make_unique<WorkerMaster>(mps_path,
-                                             log_file,
+    // DECISION: log_level is kept in the signature for the callers but MasterSolver does not use
+    // it. mps_has_alpha maps to the resume mode: any non-zero mode reads the alphas from the MPS.
+    (void)log_level;
+    alpha_col_id_mapping_.clear();
+    master_ = std::make_unique<MasterSolver>(log_file,
+                                             mps_path,
                                              solver_type,
                                              variable_map,
-                                             log_level,
+                                             mps_has_alpha ? 1 : 0,
                                              subproblems_count,
-                                             mps_has_alpha,
                                              master_solution_tolerance,
-                                             subproblem_cut_coefficient_tolerance);
+                                             subproblem_cut_coefficient_tolerance,
+                                             alpha_col_id_mapping_);
     variable_map_ = variable_map;
     master_path_ = mps_path;
     logger_ = std::move(logger);
@@ -47,7 +51,7 @@ bool BendersMasterManager::IsEmpty() const
     return is_empty_;
 }
 
-WorkerMaster* BendersMasterManager::Master() const
+MasterSolver* BendersMasterManager::Master() const
 {
     return master_.get();
 }
@@ -62,15 +66,9 @@ const VariableMap& BendersMasterManager::GetVariableMap() const
     return variable_map_;
 }
 
-void BendersMasterManager::AddRows(const std::vector<char>& qrtype,
-                                   const std::vector<double>& rhs,
-                                   const std::vector<double>& range,
-                                   const std::vector<int>& mstart,
-                                   const std::vector<int>& mclind,
-                                   const std::vector<double>& dmatval,
-                                   const std::vector<std::string>& row_names) const
+void BendersMasterManager::AddRows(const solver_utils::ConstraintsToAdd& rows) const
 {
-    master_->add_rows(qrtype, rhs, range, mstart, mclind, dmatval, row_names);
+    master_->add_rows(rows);
 }
 
 void BendersMasterManager::ChangeRhs(int id_row, double val) const
@@ -95,28 +93,28 @@ int BendersMasterManager::GetNcols() const
 
 int BendersMasterManager::GetNElems() const
 {
-    return master_->solver().get_nelems();
+    return master_->get_nelems();
 }
 
 SparseMatrix BendersMasterManager::GetRowsCoeffs(int first, int last) const
 {
-    return master_->solver().get_rows(first, last);
+    return master_->get_rows(first, last);
 }
 
 std::vector<char> BendersMasterManager::GetRowType(int first, int last) const
 {
-    return master_->solver().get_row_type(first, last);
+    return master_->get_row_type(first, last);
 }
 
 std::vector<double> BendersMasterManager::GetObjectiveFunctionCoeffs() const
 {
-    return master_->solver().get_obj();
+    return master_->get_obj();
 }
 
 void BendersMasterManager::SetObjectiveFunction(const double* coeffs, int first, int last) const
 {
     assert(last >= first);
-    master_->solver().set_obj(std::vector<double>(coeffs, coeffs + (last - first + 1)), first);
+    master_->set_obj(std::vector<double>(coeffs, coeffs + (last - first + 1)), first);
 }
 
 void BendersMasterManager::SetObjectiveFunctionCoeffsToZeros() const
@@ -162,10 +160,7 @@ void BendersMasterManager::SolveMaster(CurrentIterationData& data,
         master_->fix_alpha(data.control.best_ub);
     }
 
-    // Solved here rather than with Worker::solve, which throws before the status
-    // can be reported
-    data.master.master_status = master_->is_mip() ? master_->solver().solve_mip()
-                                                  : master_->solver().solve_lp();
+    data.master.master_status = master_->solve();
     if (data.master.master_status != SOLVER_STATUS::OPTIMAL)
     {
         const auto problem_status = SOLVER_STRING_STATUS[data.master.master_status];
@@ -200,10 +195,10 @@ void BendersMasterManager::SolveMaster(CurrentIterationData& data,
     data.master.overall_subpb_cost_under_approx = solution.alpha;
     data.master.single_subpb_costs_under_approx = solution.alphas;
     data.solution.master_only_vars_out = solution.master_only;
-    data.master.lb = master_->objective_value();
+    data.master.lb = master_->get_objective_value();
 
-    const auto lb = master_->solver().get_lb();
-    const auto ub = master_->solver().get_ub();
+    const auto lb = master_->get_lb();
+    const auto ub = master_->get_ub();
     for (const auto& [id, name]: master_->id_to_name())
     {
         data.solution.max_invest[name] = ub[id];

@@ -38,15 +38,13 @@ endif()
 add_library(interfaces INTERFACE)
 target_include_directories(interfaces INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
-add_library(linear_solvers src/solvers/LinearSolvers.cpp)
+add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/MasterSolver.cpp src/solvers/solver_utils.cpp src/workers/Cut.cpp)
 target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 
 add_library(workers
-    src/workers/Cut.cpp
     src/workers/Worker.cpp
-    src/workers/SubproblemWorker.cpp
-    src/workers/WorkerMaster.cpp)
+    src/workers/SubproblemWorker.cpp)
 target_link_libraries(workers PUBLIC linear_solvers)
 
 add_library(output
@@ -58,6 +56,7 @@ target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 add_library(benders_managers
     src/utilities/benders_managers_utilities/common.cpp
     src/benders_managers/BendersMasterManager.cpp
+    src/benders_managers/MasterManager.cpp
     src/benders_managers/BendersCutsManagerSequential.cpp
     src/utilities/benders_managers_utilities/BendersMathLogger.cpp
     src/benders_managers/BendersOutputManager.cpp
@@ -91,7 +90,8 @@ target_link_libraries(implementations PUBLIC benders_managers logger output)
 
 if(BUILD_MPI)
     add_library(benders_mpi
-        src/benders_managers/BendersCutsManagerMpi.cpp)
+        src/benders_managers/BendersCutsManagerMpi.cpp
+        src/implementations/BendersMpi.cpp)
     target_link_libraries(benders_mpi PUBLIC
         implementations Boost::mpi Boost::serialization MPI::MPI_CXX)
 endif()

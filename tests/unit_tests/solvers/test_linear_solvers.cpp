@@ -543,15 +543,6 @@ TEST_F(SolverMathOptTest, ChgObj_SparseUpdate)
     EXPECT_EQ(solver->get_obj(), (std::vector<double>{-5.0, 7.0}));
 }
 
-TEST_F(SolverMathOptTest, ChgObjDirection_SwitchToMaximize)
-{
-    auto solver = make_solver(lp_path_);
-    solver->chg_obj_direction(false);
-
-    EXPECT_EQ(solver->solve_lp(), OPTIMAL);
-    EXPECT_DOUBLE_EQ(solver->get_lp_value(), 0.0);
-}
-
 // ---------------------------------------------------------------------------
 // Bounds and column types
 // ---------------------------------------------------------------------------

@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
+#include "solvers/MasterSolver.h"
 #include "utilities/benders_managers_utilities/BendersStructsDatas.h"
 #include "utilities/benders_managers_utilities/common.h"
 #include "utilities/interfaces/ILogger.h"
 #include "utilities/output/OutputWriter.h"
-#include "workers/WorkerMaster.h"
 
 class BendersMasterManager
 {
@@ -31,20 +31,14 @@ public:
                       const std::map<int, double>& subproblem_cut_coefficient_tolerance);
     void FreeMaster();
     [[nodiscard]] bool IsEmpty() const;
-    [[nodiscard]] WorkerMaster* Master() const;
+    [[nodiscard]] MasterSolver* Master() const;
 
     // Variable management
     void SetVariableMap(const VariableMap& variable_map);
     [[nodiscard]] const VariableMap& GetVariableMap() const;
 
     // Constraint management
-    void AddRows(const std::vector<char>& qrtype,
-                 const std::vector<double>& rhs,
-                 const std::vector<double>& range,
-                 const std::vector<int>& mstart,
-                 const std::vector<int>& mclind,
-                 const std::vector<double>& dmatval,
-                 const std::vector<std::string>& row_names = {}) const;
+    void AddRows(const solver_utils::ConstraintsToAdd& rows) const;
     void ChangeRhs(int id_row, double val) const;
     void GetRhs(double& rhs, int id_row) const;
     [[nodiscard]] int GetNrows() const;
@@ -89,7 +83,8 @@ public:
     [[nodiscard]] const std::vector<int>& GetMasterOnlyVarsIds() const;
 
 private:
-    std::unique_ptr<WorkerMaster> master_;
+    AlphaCOlIDMapping alpha_col_id_mapping_; /*!< declared before master_, which refers to it */
+    std::unique_ptr<MasterSolver> master_;
     VariableMap variable_map_;
     bool is_empty_ = true;
 

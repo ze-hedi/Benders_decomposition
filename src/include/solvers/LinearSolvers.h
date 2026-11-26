@@ -290,7 +290,6 @@ public:
                   const std::vector<char>& col_types = {},
                   const std::vector<std::string>& col_names = {});
     void chg_obj(const std::vector<int>& mindex, const std::vector<double>& obj);
-    void chg_obj_direction(bool minimize);
     void chg_bounds(const std::vector<int>& mindex,
                     const std::vector<char>& qbtype,
                     const std::vector<double>& bnd);
@@ -351,7 +350,6 @@ private:
     std::vector<char> _row_types;
     std::optional<math_opt::SolveResult> _last_result;
     std::optional<math_opt::Basis> _initial_basis;
-    bool _minimize = true;
     int _log_level = 0;
     std::ofstream _log_stream;
     mutable std::list<std::ostream*> _streams;

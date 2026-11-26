@@ -55,7 +55,8 @@ target_link_libraries(benders_managers PUBLIC linear_solvers workers interfaces 
 
 add_library(options
     src/utilities/options/OptionsReader.cpp
-    src/utilities/options/StructureReader.cpp)
+    src/utilities/options/StructureReader.cpp
+    src/utilities/options/WeightsReader.cpp)
 target_link_libraries(options PUBLIC interfaces jsoncpp_static)
 
 add_library(logger

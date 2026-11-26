@@ -7,7 +7,7 @@
 
 #include <boost/mpi.hpp>
 
-#include "implementations/MpiCommunicationStrategy.h"
+#include "utilities/mpi_utilities/MpiCommunicationStrategy.h"
 #include "gtest/gtest.h"
 
 namespace mpi = boost::mpi;

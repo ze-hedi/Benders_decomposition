@@ -1,6 +1,6 @@
 #pragma once
 
-#include "implementations/ICommunicationStrategy.h"
+#include "utilities/mpi_utilities/ICommunicationStrategy.h"
 
 /**
  * @brief Communication strategy for single-process (sequential) execution.

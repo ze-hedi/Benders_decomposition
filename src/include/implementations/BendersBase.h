@@ -7,7 +7,7 @@
 
 #include "benders_managers/BendersMasterManager.h"
 #include "benders_managers/BendersOutputManager.h"
-#include "implementations/ICommunicationStrategy.h"
+#include "utilities/mpi_utilities/ICommunicationStrategy.h"
 #include "utilities/benders_managers_utilities/BendersMathLogger.h"
 #include "utilities/benders_managers_utilities/BendersStructsDatas.h"
 #include "utilities/benders_managers_utilities/common.h"

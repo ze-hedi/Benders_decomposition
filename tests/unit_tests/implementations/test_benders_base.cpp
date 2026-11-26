@@ -5,7 +5,7 @@
 
 #include "implementations/BendersBase.h"
 #include "implementations/BendersSequential.h"
-#include "implementations/SequentialCommunicationStrategy.h"
+#include "utilities/mpi_utilities/SequentialCommunicationStrategy.h"
 #include "test_utils/LoggerStub.h"
 #include "test_utils/WriterStub.h"
 

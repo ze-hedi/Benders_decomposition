@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "implementations/SequentialCommunicationStrategy.h"
+#include "utilities/mpi_utilities/SequentialCommunicationStrategy.h"
 #include "utilities/helpers/Timer.h"
 
 BendersSequential::BendersSequential(const BendersBaseOptions& options,

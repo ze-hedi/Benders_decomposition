@@ -20,6 +20,21 @@ FetchContent_Declare(jsoncpp
     GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(jsoncpp)
 
+option(BUILD_MPI "Build the MPI implementation of Benders" ON)
+if(BUILD_MPI)
+    find_package(MPI REQUIRED COMPONENTS CXX)
+    # OR-Tools exposes Boost 1.87 headers, which has no MPI component: build Boost.MPI from
+    # the same version so headers and libraries match.
+    set(BOOST_INCLUDE_LIBRARIES mpi serialization)
+    set(BOOST_ENABLE_MPI ON)
+    FetchContent_Declare(Boost
+        URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz
+        URL_HASH SHA256=7da75f171837577a52bbf217e17f8ea576c7c246e4594d617bfde7fafd408be5
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(Boost)
+endif()
+
 add_library(interfaces INTERFACE)
 target_include_directories(interfaces INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
@@ -73,6 +88,13 @@ add_library(implementations
     src/implementations/BendersBase.cpp
     src/implementations/BendersSequential.cpp)
 target_link_libraries(implementations PUBLIC benders_managers logger output)
+
+if(BUILD_MPI)
+    # Interface target until the MPI sources land
+    add_library(benders_mpi INTERFACE)
+    target_link_libraries(benders_mpi INTERFACE
+        implementations Boost::mpi Boost::serialization MPI::MPI_CXX)
+endif()
 
 add_library(benders_builder src/implementations/BendersSequentialBuilder.cpp)
 target_link_libraries(benders_builder PUBLIC options implementations)

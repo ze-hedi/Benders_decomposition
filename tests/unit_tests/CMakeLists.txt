@@ -144,3 +144,16 @@ target_link_libraries(test_benders_builder PRIVATE
 
 add_test(NAME test_benders_builder COMMAND test_benders_builder)
 set_property(TEST test_benders_builder PROPERTY LABELS unit)
+
+if(BUILD_MPI)
+    add_executable(test_mpi_setup
+            mpi/test_mpi_setup.cpp
+    )
+
+    target_link_libraries(test_mpi_setup PRIVATE
+            benders_mpi
+            GTest::gtest
+    )
+
+    add_mpi_test(test_mpi_setup 2)
+endif()

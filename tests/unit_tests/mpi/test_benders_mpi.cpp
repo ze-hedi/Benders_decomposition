@@ -157,6 +157,54 @@ TEST_F(BendersMpiTest, PartialAggregation_ConvergesToMipOptimum)
     expect_mip_optimum();
 }
 
+// Master rows once the problems are built, before any cut is added
+int master_rows_after_init(std::unique_ptr<BendersMpi> benders, const mpi::communicator& world)
+{
+    benders->InitializeProblems();
+    const int nrows = world.rank() == 0 ? benders->GetMasterManager().GetNrows() : 0;
+    return nrows;
+}
+
+// The group cut only bounds the sum of its alphas: one alpha_0 - alpha_j = 0 row is added for
+// each other subproblem of the group
+TEST_F(BendersMpiTest, AggregatedCut_FixesAlphasOfTheGroupEqual)
+{
+    const int rows_one_cut_per_sub = master_rows_after_init(make_mpi(), world_);
+    options_.NB_CUTS_PER_ITER = 1;
+    auto benders = make_mpi();
+    benders->InitializeProblems();
+
+    if (world_.rank() == 0)
+    {
+        const auto& master = benders->GetMasterManager();
+        const int nrows = master.GetNrows();
+        ASSERT_EQ(nrows, rows_one_cut_per_sub + SUBPROBLEM_COUNT - 1);
+
+        const int first = rows_one_cut_per_sub;
+        const auto types = master.GetRowType(first, nrows - 1);
+        const auto coeffs = master.GetRowsCoeffs(first, nrows - 1);
+        int alpha_0 = -1;
+        for (int i = 0; i < nrows - first; ++i)
+        {
+            EXPECT_EQ(types[i], 'E');
+            double rhs = 1.0;
+            master.GetRhs(rhs, first + i);
+            EXPECT_DOUBLE_EQ(rhs, 0.0);
+            ASSERT_EQ(coeffs.starts[i + 1] - coeffs.starts[i], 2);
+            const int k = coeffs.starts[i];
+            EXPECT_DOUBLE_EQ(coeffs.values[k], 1.0);
+            EXPECT_DOUBLE_EQ(coeffs.values[k + 1], -1.0);
+            // Every row ties the same alpha_0 to a different alpha
+            if (alpha_0 < 0)
+            {
+                alpha_0 = coeffs.indices[k];
+            }
+            EXPECT_EQ(coeffs.indices[k], alpha_0);
+            EXPECT_NE(coeffs.indices[k + 1], alpha_0);
+        }
+    }
+}
+
 TEST_F(BendersMpiTest, PerSubCache_ConvergesToMipOptimum)
 {
     options_.CACHE_PROBLEMS = CacheProblems::PER_SUB;

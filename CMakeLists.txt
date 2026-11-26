@@ -53,6 +53,9 @@ add_library(benders_managers
     src/utilities/benders_managers_utilities/SubproblemBasisCache.cpp)
 target_link_libraries(benders_managers PUBLIC linear_solvers workers interfaces output jsoncpp_static)
 
+add_library(options src/utilities/options/OptionsReader.cpp)
+target_link_libraries(options PUBLIC interfaces jsoncpp_static)
+
 add_library(logger
     src/utilities/logger/CandidateLog.cpp
     src/utilities/logger/IterationResultLog.cpp

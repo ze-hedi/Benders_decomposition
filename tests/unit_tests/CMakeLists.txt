@@ -113,3 +113,19 @@ target_link_libraries(test_implementations PRIVATE
 
 add_test(NAME test_implementations COMMAND test_implementations)
 set_property(TEST test_implementations PROPERTY LABELS unit)
+
+add_executable(test_options
+        utilities/options/test_options_reader.cpp
+)
+
+target_link_libraries(test_options PRIVATE
+        options
+        GTest::gtest_main
+)
+
+target_compile_definitions(test_options PRIVATE
+        TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
+)
+
+add_test(NAME test_options COMMAND test_options)
+set_property(TEST test_options PROPERTY LABELS unit)

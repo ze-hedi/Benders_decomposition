@@ -90,9 +90,9 @@ add_library(implementations
 target_link_libraries(implementations PUBLIC benders_managers logger output)
 
 if(BUILD_MPI)
-    # Interface target until the MPI sources land
-    add_library(benders_mpi INTERFACE)
-    target_link_libraries(benders_mpi INTERFACE
+    add_library(benders_mpi
+        src/benders_managers/BendersCutsManagerMpi.cpp)
+    target_link_libraries(benders_mpi PUBLIC
         implementations Boost::mpi Boost::serialization MPI::MPI_CXX)
 endif()
 

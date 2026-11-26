@@ -184,3 +184,22 @@ if(BUILD_MPI)
 
     add_mpi_test(test_mpi_communication_strategy 3)
 endif()
+
+if(BUILD_MPI)
+    add_executable(test_benders_cuts_manager_mpi
+            mpi/test_benders_cuts_manager_mpi.cpp
+    )
+
+    target_include_directories(test_benders_cuts_manager_mpi PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+    target_link_libraries(test_benders_cuts_manager_mpi PRIVATE
+            benders_mpi
+            GTest::gtest
+    )
+
+    target_compile_definitions(test_benders_cuts_manager_mpi PRIVATE
+            TEST_DATA_DIR="${PROJECT_SOURCE_DIR}/tests/data"
+    )
+
+    add_mpi_test(test_benders_cuts_manager_mpi 2)
+endif()

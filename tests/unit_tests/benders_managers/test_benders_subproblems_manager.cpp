@@ -213,7 +213,7 @@ TEST_F(BendersSubProblemsManagerTest, SubproblemWeight_CustomWeightsMissingName_
     options_.SLAVE_WEIGHT = "weights.txt";
     options_.weights = {{"sub1.mps", 0.3}};
     auto manager = make_manager();
-    EXPECT_THROW(manager->SubproblemWeight(2, "sub2.mps"), std::out_of_range);
+    EXPECT_THROW(static_cast<void>(manager->SubproblemWeight(2, "sub2.mps")), std::out_of_range);
 }
 
 TEST_F(BendersSubProblemsManagerTest, MakeSubproblemWorker_ScalesObjectiveByWeight)

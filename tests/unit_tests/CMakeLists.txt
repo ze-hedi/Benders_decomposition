@@ -20,11 +20,10 @@ set_property(TEST test_linear_solvers PROPERTY LABELS unit)
 
 add_executable(test_workers
         workers/test_cut.cpp
-        workers/test_worker.cpp
 )
 
 target_link_libraries(test_workers PRIVATE
-        workers
+        linear_solvers
         GTest::gtest_main
 )
 

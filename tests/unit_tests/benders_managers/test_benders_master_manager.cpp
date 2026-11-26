@@ -75,7 +75,7 @@ protected:
                               SolverType::GLOP,
                               0,
                               1,
-                              false,
+                              RestartMode::COLD_START,
                               logger_,
                               1e-4,
                               {{0, 0.0}});
@@ -89,7 +89,7 @@ protected:
                               SolverType::HIGHS,
                               0,
                               2,
-                              false,
+                              RestartMode::COLD_START,
                               logger_,
                               1e-4,
                               {{0, 0.0}, {1, 0.0}});
@@ -103,7 +103,7 @@ protected:
                               SolverType::GLOP,
                               0,
                               1,
-                              false,
+                              RestartMode::COLD_START,
                               logger_,
                               1e-4,
                               {{0, 0.0}});
@@ -571,7 +571,7 @@ TEST_F(BendersMasterManagerTest, SolveMaster_WritesLastMaster)
                          SolverType::HIGHS,
                          0,
                          2,
-                         true,
+                         RestartMode::RESUME,
                          logger_,
                          1e-4,
                          {{0, 0.0}, {1, 0.0}});

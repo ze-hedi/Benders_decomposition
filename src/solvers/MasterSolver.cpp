@@ -13,14 +13,15 @@
 MasterSolver::MasterSolver(const std::filesystem::path& log_file,
                            const std::filesystem::path& mps_path,
                            SolverType solver_type,
+                           int log_level,
                            const VariableMap& variable_map,
-                           int resume_mode,
+                           RestartMode restart_mode,
                            int subproblems_count,
                            double master_solution_tolerance,
                            const std::map<int, double>& subproblem_cut_coefficient_tolerance,
                            AlphaCOlIDMapping& alpha_col_id_mapping):
-    Solver(mps_path, log_file, solver_type, variable_map),
-    resume_mode_(resume_mode),
+    Solver(mps_path, log_file, solver_type, log_level, variable_map),
+    restart_mode_(restart_mode),
     subproblems_count_(subproblems_count),
     master_solution_tolerance_(master_solution_tolerance),
     subproblem_tolerance_(subproblem_cut_coefficient_tolerance),
@@ -30,7 +31,7 @@ MasterSolver::MasterSolver(const std::filesystem::path& log_file,
     {
         id_to_name_[id] = name;
     }
-    if (resume_mode_ == 0)
+    if (!MasterHasAlphaVariables(restart_mode_))
     {
         set_upper_bounds();
     }
@@ -566,9 +567,8 @@ void MasterSolver::set_alpha_vars()
     const std::string alpha_str("alpha");
     subproblem_alpha_ids_.assign(subproblems_count_, -1);
 
-    // DECISION: resume_mode follows RestartMode (COLD_START = 0, RESUME = 1, HOT_START = 2);
-    // any restart reloads a master MPS from a previous run, which already holds the alphas
-    if (resume_mode_ != 0)
+    // A restarted run reloads a master MPS from a previous run, which already holds the alphas
+    if (MasterHasAlphaVariables(restart_mode_))
     {
         alpha_id_ = col_index(alpha_str);
         for (int i(0); i < subproblems_count_; ++i)

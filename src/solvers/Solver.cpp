@@ -9,12 +9,13 @@
 Solver::Solver(const std::filesystem::path& mps_path,
                const std::filesystem::path& log_file,
                SolverType solver_type,
+               int log_level,
                const VariableMap& variable_map):
     _solver_type(solver_type),
     _model(solver_utils::read_prob_mps(mps_path)),
     variable_map_(variable_map)
 {
-    if (!log_file.empty())
+    if (log_level > 0 && !log_file.empty())
     {
         _log_stream.open(log_file, std::ofstream::out | std::ofstream::app);
         args_.message_callback = math_opt::PrinterMessageCallback(_log_stream);

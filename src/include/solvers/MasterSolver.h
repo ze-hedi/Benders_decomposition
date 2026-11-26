@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "solvers/RestartMode.h"
 #include "solvers/Solver.h"
 #include "solvers/solver_utils.h"
 #include "workers/types.h"
@@ -15,8 +16,9 @@ public:
     MasterSolver(const std::filesystem::path& log_file,
                  const std::filesystem::path& mps_path,
                  SolverType solver_type,
+                 int log_level,
                  const VariableMap& variable_map,
-                 int resume_mode,
+                 RestartMode restart_mode,
                  int subproblems_count,
                  double master_solution_tolerance,
                  const std::map<int, double>& subproblem_cut_coefficient_tolerance,
@@ -100,7 +102,7 @@ public:
     [[nodiscard]] const std::vector<int>& int_var_ids() const;
 
 private:
-    int resume_mode_;
+    RestartMode restart_mode_;
     int subproblems_count_;
     Int2Str id_to_name_;       /*!< name of each candidate, by column */
     double master_solution_tolerance_;

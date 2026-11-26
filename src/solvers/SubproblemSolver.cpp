@@ -8,9 +8,10 @@
 SubproblemSolver::SubproblemSolver(const std::filesystem::path& mps_path,
                                    const std::filesystem::path& log_file,
                                    SolverType solver_type,
+                                   int log_level,
                                    const VariableMap& variable_map,
                                    double weight):
-    Solver(mps_path, log_file, solver_type, variable_map)
+    Solver(mps_path, log_file, solver_type, log_level, variable_map)
 {
     check_is_lp();
     scale_objective(weight);

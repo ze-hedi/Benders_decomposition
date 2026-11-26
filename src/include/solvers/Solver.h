@@ -52,11 +52,13 @@ public:
 
 protected:
     /**
-     * @param log_file : solver output is appended to it, none if empty
+     * @param log_file : solver output is appended to it when log_level > 0
+     * @param log_level : 0 ignores the solver output
      */
     Solver(const std::filesystem::path& mps_path,
            const std::filesystem::path& log_file,
            SolverType solver_type,
+           int log_level,
            const VariableMap& variable_map);
 
     /**

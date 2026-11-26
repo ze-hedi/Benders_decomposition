@@ -59,7 +59,7 @@ protected:
                                          SolverType::GLOP,
                                          0,
                                          2,
-                                         false,
+                                         RestartMode::COLD_START,
                                          std::make_shared<Benders::Test::LoggerNOOPStub>(),
                                          1e-4,
                                          {{0, 1e-3}, {1, 1e-3}});

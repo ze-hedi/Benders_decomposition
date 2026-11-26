@@ -25,7 +25,7 @@ public:
                       SolverType solver_type,
                       int log_level,
                       int subproblems_count,
-                      bool mps_has_alpha,
+                      RestartMode restart_mode,
                       Logger logger,
                       double master_solution_tolerance,
                       const std::map<int, double>& subproblem_cut_coefficient_tolerance);

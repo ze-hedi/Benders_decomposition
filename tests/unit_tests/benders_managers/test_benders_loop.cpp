@@ -136,7 +136,7 @@ protected:
                             SolverType::HIGHS,
                             0,
                             subproblem_count,
-                            false,
+                            RestartMode::COLD_START,
                             logger,
                             options_.MASTER_SOLUTION_TOLERANCE,
                             cut_tolerances);

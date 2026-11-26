@@ -42,10 +42,6 @@ add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/Solver.cpp 
 target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 
-add_library(workers
-    src/workers/Worker.cpp)
-target_link_libraries(workers PUBLIC linear_solvers)
-
 add_library(output
     src/utilities/output/JsonWriter.cpp
     src/utilities/output/VoidWriter.cpp)
@@ -64,7 +60,7 @@ add_library(benders_managers
     src/utilities/benders_managers_utilities/LastIterationReader.cpp
     src/utilities/benders_managers_utilities/LastIterationWriter.cpp
     src/utilities/benders_managers_utilities/SubproblemBasisCache.cpp)
-target_link_libraries(benders_managers PUBLIC linear_solvers workers interfaces output jsoncpp_static)
+target_link_libraries(benders_managers PUBLIC linear_solvers interfaces output jsoncpp_static)
 
 add_library(options
     src/utilities/options/OptionsReader.cpp

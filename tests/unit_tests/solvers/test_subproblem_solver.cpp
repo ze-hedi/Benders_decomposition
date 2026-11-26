@@ -43,12 +43,12 @@ protected:
 
     SubproblemSolver make_subproblem(double weight = 1.0)
     {
-        return {data_dir_ / "benders_sub.mps", "", SolverType::GLOP, {{"x", 0}}, weight};
+        return {data_dir_ / "benders_sub.mps", "", SolverType::GLOP, 0, {{"x", 0}}, weight};
     }
 
     SubproblemSolver make_warm_start_subproblem()
     {
-        return {data_dir_ / "warm_start_sub.mps", "", SolverType::GLOP, {{"x0", 0}}, 1.0};
+        return {data_dir_ / "warm_start_sub.mps", "", SolverType::GLOP, 0, {{"x0", 0}}, 1.0};
     }
 
     const fs::path data_dir_ = fs::path(TEST_DATA_DIR) / "mps";
@@ -65,6 +65,7 @@ TEST_F(SubproblemSolverTest, IntegerVariablesThrow)
     EXPECT_THROW(SubproblemSolver(data_dir_ / "mip_toy_prob.mps",
                                   "",
                                   SolverType::HIGHS,
+                                  0,
                                   {{"x1", 0}},
                                   1.0),
                  std::invalid_argument);
@@ -256,7 +257,7 @@ TEST_F(SubproblemSolverTest, WrittenProblemKeepsWeightedObjective)
     auto subproblem = make_subproblem(3.0);
     subproblem.write_problem(output_dir_ / "sub.mps");
 
-    SubproblemSolver reread(output_dir_ / "sub.mps", "", SolverType::GLOP, {{"x", 0}}, 1.0);
+    SubproblemSolver reread(output_dir_ / "sub.mps", "", SolverType::GLOP, 0, {{"x", 0}}, 1.0);
     reread.fix_linking_variables({{"x", 2.0}});
     ASSERT_EQ(reread.solve(), OPTIMAL);
     EXPECT_NEAR(reread.get_objective_value(), 18.0, 1e-6);

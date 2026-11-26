@@ -26,8 +26,11 @@ namespace
 class TestSolver: public Solver
 {
 public:
-    TestSolver(const fs::path& mps_path, const fs::path& log_file, SolverType solver_type):
-        Solver(mps_path, log_file, solver_type, {})
+    TestSolver(const fs::path& mps_path,
+               const fs::path& log_file,
+               SolverType solver_type,
+               int log_level = 1):
+        Solver(mps_path, log_file, solver_type, log_level, {})
     {
     }
 
@@ -142,6 +145,14 @@ TEST_F(SolverTest, WritesSolverLog)
     ASSERT_EQ(solver.solve(), OPTIMAL);
 
     EXPECT_TRUE(fs::exists(output_dir_ / "solver.log"));
+}
+
+TEST_F(SolverTest, LogLevelZeroWritesNoLog)
+{
+    TestSolver solver(data_dir_ / "lp_toy_prob.mps", output_dir_ / "solver.log", SolverType::GLOP, 0);
+    ASSERT_EQ(solver.solve(), OPTIMAL);
+
+    EXPECT_FALSE(fs::exists(output_dir_ / "solver.log"));
 }
 
 TEST_F(SolverTest, NoLogFileWhenPathIsEmpty)

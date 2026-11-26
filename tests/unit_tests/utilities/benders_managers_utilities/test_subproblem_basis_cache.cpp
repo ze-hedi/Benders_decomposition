@@ -19,7 +19,7 @@ class SubproblemBasisCacheTest: public ::testing::Test
 protected:
     static std::unique_ptr<SubproblemSolver> make(const fs::path& mps_path)
     {
-        return std::make_unique<SubproblemSolver>(mps_path, "", SolverType::GLOP, VariableMap{}, 1.0);
+        return std::make_unique<SubproblemSolver>(mps_path, "", SolverType::GLOP, 0, VariableMap{}, 1.0);
     }
 
     static std::unique_ptr<SubproblemSolver> solved(const fs::path& mps_path)

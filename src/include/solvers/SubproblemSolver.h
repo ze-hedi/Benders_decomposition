@@ -27,6 +27,7 @@ public:
     SubproblemSolver(const std::filesystem::path& mps_path,
                      const std::filesystem::path& log_file,
                      SolverType solver_type,
+                     int log_level,
                      const VariableMap& variable_map,
                      double weight);
 

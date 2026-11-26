@@ -12,20 +12,18 @@ void BendersMasterManager::CreateMaster(
   SolverType solver_type,
   int log_level,
   int subproblems_count,
-  bool mps_has_alpha,
+  RestartMode restart_mode,
   Logger logger,
   double master_solution_tolerance,
   const std::map<int, double>& subproblem_cut_coefficient_tolerance)
 {
-    // DECISION: log_level is kept in the signature for the callers but MasterSolver does not use
-    // it. mps_has_alpha maps to the resume mode: any non-zero mode reads the alphas from the MPS.
-    (void)log_level;
     alpha_col_id_mapping_.clear();
     master_ = std::make_unique<MasterSolver>(log_file,
                                              mps_path,
                                              solver_type,
+                                             log_level,
                                              variable_map,
-                                             mps_has_alpha ? 1 : 0,
+                                             restart_mode,
                                              subproblems_count,
                                              master_solution_tolerance,
                                              subproblem_cut_coefficient_tolerance,

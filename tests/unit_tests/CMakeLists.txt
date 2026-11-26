@@ -170,3 +170,16 @@ if(BUILD_MPI)
 
     add_mpi_test(test_mpi_serialization 2)
 endif()
+
+if(BUILD_MPI)
+    add_executable(test_mpi_communication_strategy
+            mpi/test_mpi_communication_strategy.cpp
+    )
+
+    target_link_libraries(test_mpi_communication_strategy PRIVATE
+            benders_mpi
+            GTest::gtest
+    )
+
+    add_mpi_test(test_mpi_communication_strategy 3)
+endif()

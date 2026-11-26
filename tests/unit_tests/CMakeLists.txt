@@ -2,6 +2,8 @@ add_executable(test_linear_solvers
         solvers/test_linear_solvers.cpp
         solvers/test_linear_solvers_getters.cpp
         solvers/test_master_solver.cpp
+        solvers/test_solver.cpp
+        solvers/test_subproblem_solver.cpp
 )
 
 target_link_libraries(test_linear_solvers PRIVATE
@@ -19,7 +21,6 @@ set_property(TEST test_linear_solvers PROPERTY LABELS unit)
 add_executable(test_workers
         workers/test_cut.cpp
         workers/test_worker.cpp
-        workers/test_subproblem_worker.cpp
 )
 
 target_link_libraries(test_workers PRIVATE

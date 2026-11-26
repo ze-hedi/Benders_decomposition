@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "ortools/math_opt/io/mps_converter.h"
-
 MasterSolver::MasterSolver(const std::filesystem::path& log_file,
                            const std::filesystem::path& mps_path,
                            SolverType solver_type,
@@ -21,11 +19,9 @@ MasterSolver::MasterSolver(const std::filesystem::path& log_file,
                            double master_solution_tolerance,
                            const std::map<int, double>& subproblem_cut_coefficient_tolerance,
                            AlphaCOlIDMapping& alpha_col_id_mapping):
-    _solver_type(solver_type),
-    _model(solver_utils::read_prob_mps(mps_path)),
+    Solver(mps_path, log_file, solver_type, variable_map),
     resume_mode_(resume_mode),
     subproblems_count_(subproblems_count),
-    variable_map_(variable_map),
     master_solution_tolerance_(master_solution_tolerance),
     subproblem_tolerance_(subproblem_cut_coefficient_tolerance),
     alpha_col_id_mapping_(alpha_col_id_mapping)
@@ -34,17 +30,6 @@ MasterSolver::MasterSolver(const std::filesystem::path& log_file,
     {
         id_to_name_[id] = name;
     }
-    if (!log_file.empty())
-    {
-        _log_file = log_file;
-        _log_stream.open(_log_file, std::ofstream::out | std::ofstream::app);
-        args_.message_callback = math_opt::PrinterMessageCallback(_log_stream);
-    }
-    _variables = _model->SortedVariables();
-    _constraints = _model->SortedLinearConstraints();
-    _is_mip = std::ranges::any_of(_model->Variables(),
-                                  [this](const math_opt::Variable& var)
-                                  { return _model->is_integer(var); });
     if (resume_mode_ == 0)
     {
         set_upper_bounds();
@@ -52,57 +37,6 @@ MasterSolver::MasterSolver(const std::filesystem::path& log_file,
     set_alpha_vars();
     set_int_var_ids();
     set_master_only_var_ids();
-}
-
-int MasterSolver::solve()
-{
-    // A basis only warm starts an LP solve. It is consumed on use: args_ is kept between
-    // solves, so it is always overwritten, otherwise a stale basis would be passed again
-    if (!_is_mip)
-    {
-        args_.model_parameters.initial_basis = std::exchange(_initial_basis, std::nullopt);
-    }
-    else
-    {
-        args_.model_parameters.initial_basis.reset();
-    }
-
-    auto result = math_opt::Solve(*_model,
-                                  solver_utils::ToMathOptSolverType(_solver_type),
-                                  args_);
-    if (!result.ok())
-    {
-        if (_log_stream.is_open())
-        {
-            _log_stream << "MathOpt solve failed: " << result.status() << std::endl;
-        }
-        return UNKNOWN;
-    }
-
-    _last_result = std::move(*result);
-
-    using TR = math_opt::TerminationReason;
-    switch (_last_result->termination.reason)
-    {
-    case TR::kOptimal:
-        return OPTIMAL;
-    case TR::kInfeasible:
-        return INFEASIBLE;
-    case TR::kUnbounded:
-    case TR::kInfeasibleOrUnbounded:
-        return UNBOUNDED;
-    default:
-        return UNKNOWN;
-    }
-}
-
-double MasterSolver::get_objective_value() const
-{
-    if (!_last_result.has_value())
-    {
-        throw GenericSolverException("get_objective_value: no solution available (solve not called)");
-    }
-    return _last_result->termination.objective_bounds.primal_bound;
 }
 
 void MasterSolver::add_rows(const solver_utils::ConstraintsToAdd& rows)
@@ -197,8 +131,6 @@ void MasterSolver::set_obj(const std::vector<double>& obj, int first)
         _model->set_objective_coefficient(_variables[first + k], obj[k]);
     }
 }
-
-
 
 void MasterSolver::chg_bounds(const std::vector<int>& mindex,
                               const std::vector<char>& qbtype,
@@ -421,16 +353,6 @@ double MasterSolver::rhs(int id_row) const
     }
 }
 
-int MasterSolver::nrows() const
-{
-    return static_cast<int>(_constraints.size());
-}
-
-int MasterSolver::ncols() const
-{
-    return static_cast<int>(_variables.size());
-}
-
 int MasterSolver::get_nelems() const
 {
     int count = 0;
@@ -506,18 +428,6 @@ std::vector<double> MasterSolver::get_ub() const
                       [this](const math_opt::Variable& var) { return _model->upper_bound(var); });
 }
 
-void MasterSolver::write_problem(const std::filesystem::path& filename) const
-{
-    const auto mps = math_opt::ModelProtoToMps(_model->ExportModel());
-    if (!mps.ok())
-    {
-        throw GenericSolverException("Failed to export MPS: " + std::string(mps.status().message()));
-    }
-    auto path = filename;
-    path.replace_extension(".mps");
-    std::ofstream(path) << *mps;
-}
-
 // Same format as SolverMathOpt::write_basis, one "name status" line per column then per row.
 void MasterSolver::write_basis(const std::filesystem::path& filename)
 {
@@ -572,11 +482,6 @@ void MasterSolver::write_basis(const std::filesystem::path& filename)
     ofs << "ROWS " << nrows() << "\n";
     write_statuses(_constraints, basis.constraint_status);
     ofs << "ENDATA\n";
-}
-
-const VariableMap& MasterSolver::name_to_id() const
-{
-    return variable_map_;
 }
 
 const Int2Str& MasterSolver::id_to_name() const

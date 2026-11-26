@@ -216,23 +216,23 @@ TEST_F(BendersSubProblemsManagerTest, SubproblemWeight_CustomWeightsMissingName_
     EXPECT_THROW(static_cast<void>(manager->SubproblemWeight(2, "sub2.mps")), std::out_of_range);
 }
 
-TEST_F(BendersSubProblemsManagerTest, MakeSubproblemWorker_ScalesObjectiveByWeight)
+TEST_F(BendersSubProblemsManagerTest, MakeSubproblemSolver_ScalesObjectiveByWeight)
 {
     options_.SLAVE_WEIGHT = "weights.txt";
     options_.weights = {{"sub1.mps", 3.0}};
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     manager->SolveSubproblem(subproblem_data, "sub1.mps", worker, nullptr);
     EXPECT_DOUBLE_EQ(subproblem_data.subproblem_cost, 18.0); // 3 * (2 * 3)
 }
 
-TEST_F(BendersSubProblemsManagerTest, MakeSubproblemWorker_UnknownSolverName_Throws)
+TEST_F(BendersSubProblemsManagerTest, MakeSubproblemSolver_UnknownSolverName_Throws)
 {
     options_.SOLVER_NAME = "unknown";
     auto manager = make_manager();
-    EXPECT_THROW(manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}}), GenericSolverException);
+    EXPECT_THROW(manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}}), GenericSolverException);
 }
 
 // ---------------------------------------------------------------------------
@@ -242,7 +242,7 @@ TEST_F(BendersSubProblemsManagerTest, MakeSubproblemWorker_UnknownSolverName_Thr
 TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_CollectsCostSubgradientAndStatus)
 {
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     manager->SolveSubproblem(subproblem_data, "sub1.mps", worker, nullptr);
@@ -258,7 +258,7 @@ TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_FixesLinkingVariablesToXCu
 {
     data_.solution.x_cut = {{"x", 4}};
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     manager->SolveSubproblem(subproblem_data, "sub1.mps", worker, nullptr);
@@ -268,7 +268,7 @@ TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_FixesLinkingVariablesToXCu
 TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_CallsPostResetHook)
 {
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}});
 
     int calls = 0;
     PlainData::SubProblemData subproblem_data;
@@ -280,7 +280,7 @@ TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_Infeasible_Throws)
 {
     data_.solution.x_cut = {{"x", 0}};
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"bad.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"bad.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     EXPECT_THROW(manager->SolveSubproblem(subproblem_data, "bad.mps", worker, nullptr),
@@ -292,7 +292,7 @@ TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_Infeasible_WritesProblem)
 {
     data_.solution.x_cut = {{"x", 0}};
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"bad.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"bad.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     EXPECT_THROW(manager->SolveSubproblem(subproblem_data, "bad.mps", worker, nullptr),
@@ -304,7 +304,7 @@ TEST_F(BendersSubProblemsManagerTest, SolveSubproblem_Infeasible_ReportsToWriter
 {
     data_.solution.x_cut = {{"x", 0}};
     auto manager = make_manager();
-    auto worker = manager->makeSubproblemWorker({"bad.mps", {{"x", 0}}});
+    auto worker = manager->makeSubproblemSolver({"bad.mps", {{"x", 0}}});
 
     PlainData::SubProblemData subproblem_data;
     EXPECT_THROW(manager->SolveSubproblem(subproblem_data, "bad.mps", worker, nullptr),
@@ -386,7 +386,7 @@ TEST_F(BendersSubProblemsManagerTest, NoCache_SolvesSubproblemsFromBeginHook)
     manager->GetSubproblemCut(
       subproblem_data_map,
       [&sub1]
-      { return std::vector<std::pair<std::string, SubproblemWorkerPtr>>{{"sub1.mps", sub1}}; },
+      { return std::vector<std::pair<std::string, SubproblemSolverPtr>>{{"sub1.mps", sub1}}; },
       manager->MakeCacheBeginHook(),
       manager->MakePostSolveHook());
 
@@ -406,7 +406,7 @@ TEST_F(BendersSubProblemsManagerTest, NoCache_CallsPostSolveHookForEachSubproble
                               manager->MakeCacheBeginHook(),
                               [&solved](const std::string& name,
                                         PlainData::SubProblemData& subproblem_data,
-                                        const SubproblemWorkerPtr&)
+                                        const SubproblemSolverPtr&)
                               {
                                   solved.push_back(name);
                                   subproblem_data.contribution_in_gap = 42.0;
@@ -556,12 +556,12 @@ TEST_F(BendersSubProblemsManagerTest, TryRestoreSubproblemBasis_BasisOfOtherProb
 {
     use_warm_start_subproblem(10);
     auto manager = make_manager();
-    auto warm = manager->makeSubproblemWorker({"warm.mps", {{"x0", 0}}});
+    auto warm = manager->makeSubproblemSolver({"warm.mps", {{"x0", 0}}});
     PlainData::SubProblemData subproblem_data;
     manager->SolveSubproblem(subproblem_data, "warm.mps", warm, nullptr);
     manager->StoreSubproblemBasis("sub1.mps", warm);
 
-    auto sub1 = manager->makeSubproblemWorker({"sub1.mps", {{"x", 0}}});
+    auto sub1 = manager->makeSubproblemSolver({"sub1.mps", {{"x", 0}}});
     manager->TryRestoreSubproblemBasis("sub1.mps", sub1);
 
     ASSERT_EQ(logger_->messages.size(), 1u);

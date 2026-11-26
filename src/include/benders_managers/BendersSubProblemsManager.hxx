@@ -20,12 +20,12 @@
 #include "utilities/helpers/Timer.h"
 #include "utilities/interfaces/ILogger.h"
 #include "utilities/output/OutputWriter.h"
-#include "workers/SubproblemWorker.h"
+#include "solvers/SubproblemSolver.h"
 
-using FastBeginHook = std::function<std::vector<std::pair<std::string, SubproblemWorkerPtr>>()>;
+using FastBeginHook = std::function<std::vector<std::pair<std::string, SubproblemSolverPtr>>()>;
 using CacheBeginHook = std::function<std::vector<std::pair<std::string, VariableMap>>()>;
 using PostSolveHook = std::function<
-  void(const std::string&, PlainData::SubProblemData&, const SubproblemWorkerPtr&)>;
+  void(const std::string&, PlainData::SubProblemData&, const SubproblemSolverPtr&)>;
 
 /**
  * CRTP base class managing subproblem creation, storage, and solving
@@ -133,7 +133,7 @@ public:
     {
         return [this]()
         {
-            std::vector<std::pair<std::string, SubproblemWorkerPtr>> nameAndWorkers;
+            std::vector<std::pair<std::string, SubproblemSolverPtr>> nameAndWorkers;
             nameAndWorkers.reserve(subproblem_map_.size());
             for (const auto& [name, worker]: subproblem_map_)
             {
@@ -162,7 +162,7 @@ public:
     // bybatch cases we decided to just impelement a hook that renders a void method
     auto MakePostSolveHookImpl()
     {
-        return [](const std::string&, PlainData::SubProblemData&, const SubproblemWorkerPtr&) {};
+        return [](const std::string&, PlainData::SubProblemData&, const SubproblemSolverPtr&) {};
     }
 
     // ---------------------------------------------------------------
@@ -215,7 +215,7 @@ public:
         ForEachSubproblem(nameAndWorkers.begin(),
                           nameAndWorkers.end(),
                           [this, &m, &subproblem_data_map, &first_exception, &post_solve_hook](
-                            const std::pair<std::string, SubproblemWorkerPtr>& kvp)
+                            const std::pair<std::string, SubproblemSolverPtr>& kvp)
                           {
                               try
                               {
@@ -263,7 +263,7 @@ public:
                               try
                               {
                                   const auto& [name, variables] = kvp;
-                                  auto worker = makeSubproblemWorker(kvp);
+                                  auto worker = makeSubproblemSolver(kvp);
                                   PlainData::SubProblemData subproblem_data;
                                   SolveSubproblem(subproblem_data,
                                                   name,
@@ -308,7 +308,7 @@ public:
      */
     void SolveSubproblem(PlainData::SubProblemData& subproblem_data,
                          const std::string& name,
-                         const std::shared_ptr<SubproblemWorker>& worker,
+                         const SubproblemSolverPtr& worker,
                          const std::function<void()>& post_reset_hook)
     {
         Timer subproblem_timer;
@@ -320,15 +320,14 @@ public:
             post_reset_hook();
         }
 
-        // Solved here rather than with Worker::solve, which throws before the status
-        // can be reported. Subproblems are LPs (checked by SubproblemWorker)
-        subproblem_data.lpstatus = worker->solver().solve_lp();
+        // Subproblems are LPs (checked by SubproblemSolver)
+        subproblem_data.lpstatus = worker->solve();
         if (subproblem_data.lpstatus != SOLVER_STATUS::OPTIMAL)
         {
             ReportInvalidStatus(name, subproblem_data.lpstatus, *worker);
         }
 
-        subproblem_data.subproblem_cost = worker->objective_value();
+        subproblem_data.subproblem_cost = worker->get_objective_value();
         subproblem_data.var_name_and_subgradient = worker->subgradient();
         subproblem_data.simplex_iter = worker->simplex_iterations();
         subproblem_data.subproblem_timer = subproblem_timer.elapsed();
@@ -340,7 +339,7 @@ public:
 
     void AddSubproblem(const std::pair<std::string, VariableMap>& kvp)
     {
-        subproblem_map_[kvp.first] = makeSubproblemWorker(kvp);
+        subproblem_map_[kvp.first] = makeSubproblemSolver(kvp);
     }
 
     void AddSubproblemName(const std::string& name)
@@ -348,16 +347,15 @@ public:
         subproblems_.push_back(name);
     }
 
-    std::shared_ptr<SubproblemWorker> makeSubproblemWorker(
+    SubproblemSolverPtr makeSubproblemSolver(
       const std::pair<std::string, VariableMap>& kvp) const
     {
-        return std::make_shared<SubproblemWorker>(GetSubproblemPath(kvp.first),
+        return std::make_shared<SubproblemSolver>(GetSubproblemPath(kvp.first),
                                                   log_file_,
                                                   SolverTypeFromString(options_.SOLVER_NAME),
                                                   kvp.second,
                                                   SubproblemWeight(data_.control.nsubproblem,
-                                                                   kvp.first),
-                                                  options_.LOG_LEVEL);
+                                                                   kvp.first));
     }
 
     // Our workers have no free(): releasing them frees their solvers
@@ -381,24 +379,24 @@ public:
     // ---------------------------------------------------------------
 
     void StoreSubproblemBasis(const std::string& name,
-                              const std::shared_ptr<SubproblemWorker>& worker)
+                              const SubproblemSolverPtr& worker)
     {
-        subproblem_basis_cache_.Store(name, worker->solver());
+        subproblem_basis_cache_.Store(name, *worker);
     }
 
     void TryRestoreSubproblemBasis(const std::string& name,
-                                   const std::shared_ptr<SubproblemWorker>& worker)
+                                   const SubproblemSolverPtr& worker)
     {
-        subproblem_basis_cache_.TryRestore(name, worker->solver(), logger_);
+        subproblem_basis_cache_.TryRestore(name, *worker, logger_);
     }
 
     // ---------------------------------------------------------------
     // Variable indices (criterion support)
     // ---------------------------------------------------------------
 
-    void SetSubproblemVariablesIndices(const SubproblemWorker& subproblem)
+    void SetSubproblemVariablesIndices(const SubproblemSolver& subproblem)
     {
-        auto&& col_names = subproblem.solver().get_col_names(0, subproblem.ncols() - 1);
+        auto&& col_names = subproblem.get_col_names();
         if (on_variables_indices_set_)
         {
             on_variables_indices_set_(col_names);
@@ -480,7 +478,7 @@ public:
 private:
     // Same report as xpansion's Worker::solve: the subproblem is written to
     // OUTPUTROOT/<name>_lp_status_<STATUS>.mps and recorded by the writer
-    void ReportInvalidStatus(const std::string& name, int lp_status, const SubproblemWorker& worker)
+    void ReportInvalidStatus(const std::string& name, int lp_status, const SubproblemSolver& worker)
     {
         const auto problem_status = SOLVER_STRING_STATUS[lp_status];
         const auto problem_filename = GetSubproblemPath(name).filename().string();

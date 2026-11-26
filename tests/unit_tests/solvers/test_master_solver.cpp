@@ -241,7 +241,6 @@ TEST_F(MasterSolverTest, GetSolutionBeforeSolveThrows)
     const auto master = small_master();
 
     EXPECT_THROW((void)master->get_solution(), GenericSolverException);
-    EXPECT_THROW((void)master->get_objective_value(), GenericSolverException);
 }
 
 TEST_F(MasterSolverTest, IntegrityToggles)
@@ -312,19 +311,6 @@ TEST_F(MasterSolverTest, ChangeRhsOfUnknownRowThrows)
 // ---------------------------------------------------------------------------
 // Output
 // ---------------------------------------------------------------------------
-
-TEST_F(MasterSolverTest, WriteProblemForcesMpsExtension)
-{
-    const auto master = small_master();
-
-    master->write_problem(output_dir_ / "master.lp");
-
-    const fs::path written = output_dir_ / "master.mps";
-    ASSERT_TRUE(fs::exists(written));
-    const std::string content = read_file(written);
-    EXPECT_NE(content.find("cap"), std::string::npos);
-    EXPECT_NE(content.find("alpha_0"), std::string::npos);
-}
 
 TEST_F(MasterSolverTest, WriteBasisAfterLpSolve)
 {

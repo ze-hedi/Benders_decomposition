@@ -3,7 +3,7 @@
 #include <mutex>
 #include <sstream>
 
-void SubproblemBasisCache::Store(const std::string& name, const SolverMathOpt& solver)
+void SubproblemBasisCache::Store(const std::string& name, const SubproblemSolver& solver)
 {
     auto basis = solver.get_basis();
     std::unique_lock lock(mutex_);
@@ -11,7 +11,7 @@ void SubproblemBasisCache::Store(const std::string& name, const SolverMathOpt& s
 }
 
 bool SubproblemBasisCache::TryRestore(const std::string& name,
-                                      SolverMathOpt& solver,
+                                      SubproblemSolver& solver,
                                       const Logger& logger)
 {
     std::shared_lock lock(mutex_);
@@ -28,18 +28,18 @@ bool SubproblemBasisCache::TryRestore(const std::string& name,
     // Fundamentally, a cache miss indicates a bug in the code handling the warm start and should be
     // investigated by developers. The fallback to no warm start is kept to avoid a crash at the
     // cost a longer simulation time, but without impact on the final result
-    if (static_cast<int>(it->second.rows.size()) != solver.get_nrows()
-        || static_cast<int>(it->second.cols.size()) != solver.get_ncols())
+    if (static_cast<int>(it->second.rows.size()) != solver.nrows()
+        || static_cast<int>(it->second.cols.size()) != solver.ncols())
     {
         std::ostringstream msg;
         msg << "Warning: cached basis for subproblem '" << name
             << "' does not match the solver's current size (" << it->second.rows.size() << " vs "
-            << solver.get_nrows() << " rows, " << it->second.cols.size() << " vs "
-            << solver.get_ncols()
+            << solver.nrows() << " rows, " << it->second.cols.size() << " vs "
+            << solver.ncols()
             << " cols) - skipping basis restore, warm start will not work for this subproblem.";
         logger->display_message(msg.str());
         return false;
     }
-    solver.set_basis(it->second.rows, it->second.cols);
+    solver.set_basis(it->second);
     return true;
 }

@@ -1,21 +1,15 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 #include <map>
-#include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
-#include "ortools/math_opt/cpp/math_opt.h"
-#include "solvers/LinearSolvers.h"
+#include "solvers/Solver.h"
 #include "solvers/solver_utils.h"
 #include "workers/types.h"
 
-namespace math_opt = ::operations_research::math_opt;
-
-class MasterSolver
+class MasterSolver: public Solver
 {
 public:
     MasterSolver(const std::filesystem::path& log_file,
@@ -27,11 +21,7 @@ public:
                  double master_solution_tolerance,
                  const std::map<int, double>& subproblem_cut_coefficient_tolerance,
                  AlphaCOlIDMapping& alpha_col_id_mapping);
-    MasterSolver(const MasterSolver&) = delete;
-    MasterSolver& operator=(const MasterSolver&) = delete;
 
-    int solve();
-    double get_objective_value() const;
     void add_rows(const solver_utils::ConstraintsToAdd& rows);
     void add_cols(const solver_utils::VariablesToAdd& cols);
     void set_obj(const std::vector<double>& obj, int first);
@@ -88,8 +78,6 @@ public:
 
     [[nodiscard]] double rhs(int id_row) const;
 
-    [[nodiscard]] int nrows() const;
-    [[nodiscard]] int ncols() const;
     [[nodiscard]] int get_nelems() const;
     [[nodiscard]] SparseMatrix get_rows(int first, int last) const;
     [[nodiscard]] std::vector<char> get_row_type(int first, int last) const;
@@ -98,17 +86,11 @@ public:
     [[nodiscard]] std::vector<double> get_ub() const;
 
     /**
-     * @brief Writes the model, in MPS (".mps" is set as extension)
-     */
-    void write_problem(const std::filesystem::path& filename) const;
-
-    /**
      * @brief Writes the basis of the last solve. A MIP solve has none: a warning is logged and
      * nothing is written
      */
     void write_basis(const std::filesystem::path& filename);
 
-    [[nodiscard]] const VariableMap& name_to_id() const;
     [[nodiscard]] const Int2Str& id_to_name() const;
 
     [[nodiscard]] bool is_mip() const;
@@ -118,19 +100,8 @@ public:
     [[nodiscard]] const std::vector<int>& int_var_ids() const;
 
 private:
-    std::filesystem::path _log_file;
-    std::ofstream _log_stream;
-    math_opt::SolveArguments args_;
-    SolverType _solver_type;
-    std::unique_ptr<math_opt::Model> _model;
-    std::vector<math_opt::Variable> _variables;
-    std::vector<math_opt::LinearConstraint> _constraints;
-    std::optional<math_opt::Basis> _initial_basis;
-    std::optional<math_opt::SolveResult> _last_result;
-    bool _is_mip = false;
     int resume_mode_;
     int subproblems_count_;
-    VariableMap variable_map_; /*!< column of each candidate, by name */
     Int2Str id_to_name_;       /*!< name of each candidate, by column */
     double master_solution_tolerance_;
     std::map<int, double> subproblem_tolerance_;

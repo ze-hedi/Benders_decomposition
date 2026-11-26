@@ -38,7 +38,7 @@ endif()
 add_library(interfaces INTERFACE)
 target_include_directories(interfaces INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
-add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/Solver.cpp src/solvers/MasterSolver.cpp src/solvers/SubproblemSolver.cpp src/solvers/solver_utils.cpp src/workers/Cut.cpp)
+add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/Solver.cpp src/solvers/MasterSolver.cpp src/solvers/SubproblemSolver.cpp src/solvers/solver_utils.cpp)
 target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 

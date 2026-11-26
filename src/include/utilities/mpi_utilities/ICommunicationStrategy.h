@@ -7,7 +7,7 @@
  * same algorithmic code in BendersBase runs in different execution contexts:
  *
  * - SequentialCommunicationStrategy: single process, every operation is a no-op
- * - MpiCommunicationStrategy: multi-process, distributed via MPI (not ported yet)
+ * - MpiCommunicationStrategy: multi-process, distributed via MPI
  */
 class ICommunicationStrategy
 {

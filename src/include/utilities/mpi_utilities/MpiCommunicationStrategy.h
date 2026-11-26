@@ -1,11 +1,10 @@
 #pragma once
 
 #include <utility>
-
-#include <boost/mpi/collectives/broadcast.hpp>
-#include <boost/mpi/communicator.hpp>
+#include <vector>
 
 #include "utilities/mpi_utilities/ICommunicationStrategy.h"
+#include "utilities/mpi_utilities/common_mpi.h"
 
 /**
  * @brief Communication strategy for multi-process execution over MPI.
@@ -15,7 +14,7 @@
 class MpiCommunicationStrategy: public ICommunicationStrategy
 {
 public:
-    explicit MpiCommunicationStrategy(boost::mpi::communicator world):
+    explicit MpiCommunicationStrategy(mpi::communicator world):
         world_(std::move(world))
     {
     }
@@ -37,15 +36,50 @@ public:
 
     void BroadcastBool(bool& value) const override
     {
-        boost::mpi::broadcast(world_, value, 0);
+        mpi::broadcast(world_, value, 0);
+    }
+
+    /// Broadcast a serializable value from root to all processes
+    template<typename T>
+    void BroadCast(T& value, int root) const
+    {
+        mpi::broadcast(world_, value, root);
+    }
+
+    /// Broadcast an array of n values from root to all processes
+    template<typename T>
+    void BroadCast(T* values, int n, int root) const
+    {
+        mpi::broadcast(world_, values, n, root);
+    }
+
+    /// Gather the value of every process, by rank, into vector_of_values on root only
+    template<typename T>
+    void Gather(const T& value, std::vector<T>& vector_of_values, int root) const
+    {
+        mpi::gather(world_, value, vector_of_values, root);
+    }
+
+    /// Combine in_value of every process with op; the result lands in out_value on root only
+    template<typename T, typename Op>
+    void Reduce(const T& in_value, T& out_value, Op op, int root) const
+    {
+        mpi::reduce(world_, in_value, out_value, op, root);
+    }
+
+    /// Combine in_value of every process with op; the result lands in out_value on every process
+    template<typename T, typename Op>
+    void AllReduce(const T& in_value, T& out_value, Op op) const
+    {
+        mpi::all_reduce(world_, in_value, out_value, op);
     }
 
     /// Underlying communicator, for the collectives the interface does not cover
-    [[nodiscard]] const boost::mpi::communicator& World() const
+    [[nodiscard]] const mpi::communicator& World() const
     {
         return world_;
     }
 
 private:
-    boost::mpi::communicator world_;
+    mpi::communicator world_;
 };

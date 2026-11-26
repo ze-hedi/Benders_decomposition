@@ -74,8 +74,11 @@ add_library(implementations
     src/implementations/BendersSequential.cpp)
 target_link_libraries(implementations PUBLIC benders_managers logger output)
 
-add_executable(mathopt_smoke src/main.cpp)
-target_link_libraries(mathopt_smoke PRIVATE ortools::ortools)
+add_library(benders_builder src/implementations/BendersSequentialBuilder.cpp)
+target_link_libraries(benders_builder PUBLIC options implementations)
+
+add_executable(benders src/main.cpp)
+target_link_libraries(benders PRIVATE benders_builder)
 
 include(CTest)
 if(BUILD_TESTING)

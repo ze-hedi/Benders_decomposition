@@ -132,3 +132,15 @@ target_compile_definitions(test_options PRIVATE
 
 add_test(NAME test_options COMMAND test_options)
 set_property(TEST test_options PROPERTY LABELS unit)
+
+add_executable(test_benders_builder
+        implementations/test_benders_sequential_builder.cpp
+)
+
+target_link_libraries(test_benders_builder PRIVATE
+        benders_builder
+        GTest::gtest_main
+)
+
+add_test(NAME test_benders_builder COMMAND test_benders_builder)
+set_property(TEST test_benders_builder PROPERTY LABELS unit)

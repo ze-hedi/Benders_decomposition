@@ -21,6 +21,21 @@ struct SubProblemData
     int simplex_iter;
     int lpstatus;
     double contribution_in_gap;
+
+    // Boost.Serialization hook used by the MPI exchange; needs no Boost header here
+    template<class Archive>
+    void serialize(Archive& ar, const unsigned int /*version*/)
+    {
+        ar & subproblem_cost;
+        ar & var_name_and_subgradient;
+        ar & criteria;
+        ar & patterns_values;
+        ar & single_subpb_costs_under_approx;
+        ar & subproblem_timer;
+        ar & simplex_iter;
+        ar & lpstatus;
+        ar & contribution_in_gap;
+    }
 };
 } // namespace PlainData
 

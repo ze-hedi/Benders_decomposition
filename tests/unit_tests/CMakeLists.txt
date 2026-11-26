@@ -157,3 +157,16 @@ if(BUILD_MPI)
 
     add_mpi_test(test_mpi_setup 2)
 endif()
+
+if(BUILD_MPI)
+    add_executable(test_mpi_serialization
+            mpi/test_mpi_serialization.cpp
+    )
+
+    target_link_libraries(test_mpi_serialization PRIVATE
+            benders_mpi
+            GTest::gtest
+    )
+
+    add_mpi_test(test_mpi_serialization 2)
+endif()

@@ -118,6 +118,7 @@ add_executable(test_options
         utilities/options/test_options_reader.cpp
         utilities/options/test_structure_reader.cpp
         utilities/options/test_weights_reader.cpp
+        utilities/options/test_benders_options_manager.cpp
 )
 
 target_link_libraries(test_options PRIVATE

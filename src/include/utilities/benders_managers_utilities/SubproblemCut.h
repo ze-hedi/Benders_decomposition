@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "workers/types.h"
+#include "solvers/types.h"
 
 namespace PlainData
 {

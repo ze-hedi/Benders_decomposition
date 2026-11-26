@@ -8,7 +8,7 @@
 #include "solvers/RestartMode.h"
 #include "solvers/Solver.h"
 #include "solvers/solver_utils.h"
-#include "workers/types.h"
+#include "solvers/types.h"
 
 class MasterSolver: public Solver
 {

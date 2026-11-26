@@ -9,7 +9,7 @@
 #include <functional>
 
 #include "utilities/mpi_utilities/MpiCommunicationStrategy.h"
-#include "workers/types.h"
+#include "solvers/types.h"
 #include "gtest/gtest.h"
 
 TEST(MpiCommunicationStrategy, RankAndSizeMatchCommunicator)

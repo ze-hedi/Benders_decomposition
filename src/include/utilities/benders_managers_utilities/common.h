@@ -9,7 +9,7 @@
 
 #include "solvers/RestartMode.h"
 #include "solvers/SolverType.h"
-#include "workers/types.h"
+#include "solvers/types.h"
 
 using Str2Dbl = std::map<std::string, double>;
 // Linking variables of each subproblem, by subproblem name

@@ -64,6 +64,8 @@ void BendersSequential::InitializeProblems()
     }
 
     InitializeMasterProblem();
+    // The cuts only bound the sum of the alphas of a group: equal alphas split it evenly
+    master_manager_.AddAlphasFixingConstraints(subproblem_per_cut_indices, _problem_to_id);
 
     cuts_manager_->SetSubproblemPerCutIndices(std::move(subproblem_per_cut_indices));
 

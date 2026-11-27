@@ -51,7 +51,6 @@ target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 add_library(benders_managers
     src/utilities/common/common.cpp
     src/benders_managers/BendersMasterManager.cpp
-    src/benders_managers/MasterManager.cpp
     src/benders_managers/BendersCutsManagerSequential.cpp
     src/utilities/output/BendersMathLogger.cpp
     src/benders_managers/BendersOutputManager.cpp

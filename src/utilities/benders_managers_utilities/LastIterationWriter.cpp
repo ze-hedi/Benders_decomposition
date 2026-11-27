@@ -10,6 +10,11 @@ void LastIterationWriter::SaveBestAndLastIterations(const LogData& best_iteratio
     last_iteration_data_ = last_iteration_log_data;
     FillOutput("last", last_iteration_data_);
     FillOutput("best_iteration", best_iteration_data_);
+    if (output_file_.has_parent_path())
+    {
+        std::error_code error;
+        std::filesystem::create_directories(output_file_.parent_path(), error);
+    }
     std::ofstream jsonOut_l(output_file_);
     if (jsonOut_l)
     {

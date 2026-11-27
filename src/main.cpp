@@ -1,6 +1,5 @@
 // Entry point: benders <input_root>
-//   Reads the study inputs through BendersOptionsManager and builds a BendersSequential.
-//   Running the algorithm is not wired yet.
+//   Reads the study inputs through BendersOptionsManager, builds a BendersSequential and runs it.
 #include <iostream>
 
 #include "implementations/BendersSequentialBuilder.h"
@@ -18,7 +17,12 @@ int main(int argc, char** argv)
     {
         const BendersOptionsManager manager(argv[1]);
         const auto benders = BuildBendersSequential(manager);
-        std::cout << "Built Benders " << benders->BendersName() << " for " << argv[1] << "\n";
+        benders->launch();
+        if (benders->isExceptionRaised())
+        {
+            // launch() logs the error and still writes the outputs
+            return 1;
+        }
     }
     catch (const OptionsError& error)
     {

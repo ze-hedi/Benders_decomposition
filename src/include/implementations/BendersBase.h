@@ -130,7 +130,7 @@ protected:
 
     [[nodiscard]] std::filesystem::path LastIterationFile() const
     {
-        return std::filesystem::path(_options.LAST_ITERATION_JSON_FILE);
+        return std::filesystem::path(_options.OUTPUTROOT) / _options.LAST_ITERATION_JSON_FILE;
     }
 
     void UpdateMaxNumberIterationRestartMode(int nb_iteration_done);

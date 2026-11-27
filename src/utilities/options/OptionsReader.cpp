@@ -392,6 +392,19 @@ OptionsReadResult ReadOptions(const Json::Value& json, const std::filesystem::pa
                 options.RESTART_MODE = ReadRestartMode(key, json[key]);
             }
         }
+        else if (key == "SOLVER_NAME")
+        {
+            // Legacy single solver of xpansion: sets each role not given by its own key
+            const auto solver = ReadEnum<SolverType>(key, json[key], SOLVER_TYPE_BY_NAME);
+            if (!json.isMember("MASTER_SOLVER"))
+            {
+                options.MASTER_SOLVER = solver;
+            }
+            if (!json.isMember("SUBPROBLEM_SOLVER"))
+            {
+                options.SUBPROBLEM_SOLVER = solver;
+            }
+        }
         else if (LEGACY_KEYS.contains(key))
         {
             result.warnings.push_back("Option " + key + " is not used and was ignored");

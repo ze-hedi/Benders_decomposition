@@ -241,10 +241,25 @@ TEST(OptionsReaderTest, GscipSubproblemSolverWarns)
     EXPECT_NE(warnings[0].find("SUBPROBLEM_SOLVER"), std::string::npos);
 }
 
-// xpansion's single solver option is replaced by MASTER_SOLVER and SUBPROBLEM_SOLVER
-TEST(OptionsReaderTest, SolverNameIsUnknown)
+// xpansion's single solver option sets both roles
+TEST(OptionsReaderTest, SolverNameSetsBothSolvers)
 {
-    EXPECT_NE(ErrorOf(R"({"SOLVER_NAME": "highs"})").find("unknown option"), std::string::npos);
+    const auto options = Read(R"({"SOLVER_NAME": "glop", "MASTER_FORMULATION": "relaxed"})").options;
+
+    EXPECT_EQ(options.MASTER_SOLVER, SolverType::GLOP);
+    EXPECT_EQ(options.SUBPROBLEM_SOLVER, SolverType::GLOP);
+}
+
+// Whatever the order of the keys
+TEST(OptionsReaderTest, SolverNameDoesNotOverrideRoleSolvers)
+{
+    const auto options = Read(R"({"MASTER_SOLVER": "gscip", "SOLVER_NAME": "glop"})").options;
+    EXPECT_EQ(options.MASTER_SOLVER, SolverType::GSCIP);
+    EXPECT_EQ(options.SUBPROBLEM_SOLVER, SolverType::GLOP);
+
+    const auto reversed = Read(R"({"SOLVER_NAME": "highs", "SUBPROBLEM_SOLVER": "glop"})").options;
+    EXPECT_EQ(reversed.MASTER_SOLVER, SolverType::HIGHS);
+    EXPECT_EQ(reversed.SUBPROBLEM_SOLVER, SolverType::GLOP);
 }
 
 TEST(OptionsReaderTest, BadEnumValueThrows)

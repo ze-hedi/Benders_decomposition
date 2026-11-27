@@ -13,8 +13,8 @@ run loop.
 
 Most of the Benders bookkeeping is implementation-independent: the iteration data, the master
 manager, the output manager, the stopping rules, the relaxation transitions, and the best-solution
-tracking. `BendersBase` centralizes them so a new implementation (for example a batch or MPI
-variant) reuses the same machinery.
+tracking. `BendersBase` centralizes them so both implementations (sequential and MPI) reuse the
+same machinery.
 
 ## How it works
 
@@ -43,7 +43,8 @@ subproblems (`total problems - 1`), and erases the master entry from `coupling_m
 ### Master creation
 
 `InitializeMasterProblem()` calls `reset_master()`, which in turn asks `master_manager_` to
-create the master worker. `get_master_path()` returns `<INPUTROOT>/<MASTER_NAME>.mps`.
+create the `MasterSolver`, passing `MASTER_SOLVER`, the `RESTART_MODE`, and the solution and
+cut tolerances. `get_master_path()` returns `<INPUTROOT>/<MASTER_NAME>.mps`.
 
 ### Relaxation handling
 
@@ -79,7 +80,7 @@ loads resume data and adjusts the iteration budget and elapsed-time timer.
 |---|---|---|
 | `BendersBase` | `BendersBase.h` / `.cpp` | Shared algorithm state and helpers |
 | `CurrentIterationData _data` | `BendersBase.h` | The iteration state passed around by reference |
-| `BendersMasterManager master_manager_` | `BendersBase.h` | Owns the master worker |
+| `BendersMasterManager master_manager_` | `BendersBase.h` | Owns the `MasterSolver` |
 | `BendersOutputManager output_manager_` | `BendersBase.h` | Owns logger, writer, and math logger |
 | `BendersRelevantIterationsData relevantIterationData_` | `BendersBase.h` | Best and last iteration traces |
 | `Timer benders_timer` | `BendersBase.h` | Elapsed Benders time, resumable |

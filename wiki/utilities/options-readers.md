@@ -36,12 +36,18 @@ object. `ReadOptions()` walks the keys and applies a setter per accepted key.
 Each setter validates type and range and writes into `BendersBaseOptions`. Examples: numeric
 gaps must be `>= 0`, `SEPARATION_PARAM` must be in `(0, 1]`, `MAX_ITERATIONS` must be `-1` or
 positive, and enums are matched case-insensitively. `RESUME` (boolean) is accepted as the legacy
-name of `RESTART_MODE` when the new key is absent.
+name of `RESTART_MODE` when the new key is absent. The legacy `SOLVER_NAME` key sets each of
+`MASTER_SOLVER` and `SUBPROBLEM_SOLVER` that is not given by its own key.
 
 Unknown keys throw `OptionsError` with a "did you mean" suggestion computed by edit distance.
 A fixed `LEGACY_KEYS` set is ignored and added to `warnings` instead. `ReadOptions()` then sets
 `INPUTROOT` to the study folder and resolves `OUTPUTROOT` (default `output`, relative paths
 under `INPUTROOT`).
+
+After the keys are applied, `CheckSolvers()` validates the solver choices against their roles:
+an `INTEGER` master needs a `MASTER_SOLVER` that solves MIPs, and the `SUBPROBLEM_SOLVER` must
+give LP duals and a basis (see [Configuration](../configuration.md) for the exact rules and the
+`GSCIP` warning).
 
 ## `StructureReader`
 

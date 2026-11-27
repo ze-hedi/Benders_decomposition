@@ -6,18 +6,18 @@ subproblem rebuilt from disk can be warm started.
 **Main code:** `src/include/utilities/benders_managers_utilities/SubproblemBasisCache.h`, `src/utilities/benders_managers_utilities/SubproblemBasisCache.cpp`
 
 **Parent:** [Utilities](index.md)
-**Related:** [Subproblems manager](../benders-managers/subproblems-manager.md), [MathOpt solver](../solvers.md)
+**Related:** [Subproblems manager](../benders-managers/subproblems-manager.md), [Subproblem solver](../solvers/subproblem-solver.md)
 
 ## Purpose
 
-In `PER_SUB` cache mode, subproblem workers are recreated from the MPS file at every iteration.
+In `PER_SUB` cache mode, subproblem solvers are recreated from the MPS file at every iteration.
 Without a warm start, each would start its simplex from scratch. The basis cache saves the basis
-after each solve and reapplies it when the next worker is built.
+after each solve and reapplies it when the next solver is built.
 
 ## How it works
 
-`Store(name, solver)` reads the solver's basis via `get_basis()` and stores it under the
-subproblem name, under a unique lock.
+`Store(name, solver)` reads the `SubproblemSolver`'s basis via `get_basis()` and stores it under
+the subproblem name, under a unique lock.
 
 `TryRestore(name, solver, logger)` reads the cached basis under a shared lock. It returns
 `false` when no basis is stored, or when the cached basis size does not match the solver's

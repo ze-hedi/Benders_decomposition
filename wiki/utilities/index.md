@@ -6,9 +6,12 @@
 
 The utilities layer holds everything that is not algorithm-specific: shared data structures,
 timers, study-folder input readers, user-facing and math loggers, JSON output, last-iteration
-persistence, and the basis cache. The communication strategies (sequential and MPI) live under
-`utilities/mpi_utilities/` and are documented in the
-[communication strategy](../implementations/communication-strategy.md) page.
+persistence, and the basis cache. The files are grouped by role: `common/` (structs, types,
+restart mode), `input/` (the builder and the last-iteration reader), `output/` (writers,
+printers, the math logger driver), `options/` (the study readers), `logger/` and `interfaces/`
+(the loggers and their interfaces), `benders_managers_utilities/` (the basis cache and
+subproblem data), and `mpi_utilities/` (the communication strategies, documented in the
+[communication strategy](../implementations/communication-strategy.md) page).
 
 ## Summary
 

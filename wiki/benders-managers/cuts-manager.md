@@ -2,18 +2,18 @@
 
 **Summary:** The cuts manager computes the separation point `x_cut` and turns subproblem
 results into Benders cuts added to the master. It is a header-only CRTP base with a sequential
-derived class.
+and an MPI derived class.
 
-**Main code:** `src/include/benders_managers/BendersCutsManager.hxx`, `src/include/benders_managers/BendersCutsManagerSequential.h`, `src/benders_managers/BendersCutsManagerSequential.cpp`
+**Main code:** `src/include/benders_managers/BendersCutsManager.hxx`, `src/include/benders_managers/BendersCutsManagerSequential.h`, `src/benders_managers/BendersCutsManagerSequential.cpp`, `src/include/benders_managers/BendersCutsManagerMpi.h`, `src/benders_managers/BendersCutsManagerMpi.cpp`
 
 **Parent:** [Benders managers](index.md)
-**Related:** [Cut](../workers/cut.md), [Master manager](master-manager.md), [Subproblems manager](subproblems-manager.md)
+**Related:** [Cut building](../solvers/cut-building.md), [Master manager](master-manager.md), [Subproblems manager](subproblems-manager.md), [Benders MPI](../implementations/benders-mpi.md)
 
 ## Purpose
 
 The cut-building logic (aggregation, subgradient summing, separation) is shared between
-variants, so it lives in the `BendersCutsManager` CRTP base. The sequential derived class only
-supplies the concrete gathering step.
+variants, so it lives in the `BendersCutsManager` CRTP base. Each derived class supplies its
+own gathering step: local for the sequential run, over MPI collectives for the parallel run.
 
 ## How it works
 
@@ -39,7 +39,7 @@ supplies the concrete gathering step.
 5. Asks the master manager to add the group cut.
 
 The accumulated `s` and `rhs` are passed to `AddGroupSubproblemCut`, which delegates to
-`make_cut()` in `WorkerMaster::add_cut()`.
+`solver_utils::make_cut()` in `MasterSolver::add_cut()`.
 
 ### Statistics
 
@@ -52,6 +52,22 @@ and maximum simplex iterations across all gathered subproblem data.
 the single `subproblem_data_map` in a one-element vector, and calls `BuildAllAggregatedCuts()`.
 `SetSubproblemPerCutIndices()` stores the grouping built by `BendersSequential`.
 
+### MPI derived class
+
+`BendersCutsManagerMpi` makes the gathering collective (every process must call it):
+
+1. `GatherAndBuildCutsImpl()` skips the gather when `exception_raised` is set, which every rank
+   must already agree on (see [Benders MPI](../implementations/benders-mpi.md)), or the other
+   ranks would wait forever in the gather.
+2. `GatherCuts()` gathers every rank's `SubProblemDataMap` on rank 0 and reduces the per-rank
+   subproblem CPU times into the cumulative time.
+3. `MasterBuildCuts()` aggregates the statistics on every rank (the gathered vector is empty
+   off rank 0, so the data stays zeroed there) and builds the aggregated cuts on rank 0 only.
+
+`BroadcastXCut()` broadcasts rank 0's `data_.solution.x_cut` to every rank after the master
+solve. `subproblem_per_cut_indices_` (the cut grouping, each subproblem with the rank that
+solves it) is only read on rank 0.
+
 ## Key components
 
 | Name | Location | Role |
@@ -61,6 +77,7 @@ the single `subproblem_data_map` in a one-element vector, and calls `BuildAllAgg
 | `BuildAllAggregatedCuts()` | `BendersCutsManager.hxx` | Sums subgradients/costs and adds cuts |
 | `RoundXCut()` | `BendersCutsManager.hxx` | Snaps near-bound values |
 | `BendersCutsManagerSequential` | `BendersCutsManagerSequential.h` / `.cpp` | Sequential gathering |
+| `BendersCutsManagerMpi` | `BendersCutsManagerMpi.h` / `.cpp` | MPI gathering and `x_cut` broadcast |
 
 ## Edge cases and unusual behavior
 

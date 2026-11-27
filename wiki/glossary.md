@@ -23,10 +23,10 @@ again, until the gap between a lower bound and an upper bound is small enough.
 - **Separation parameter** — a value in `[0,1]` blending the previous and current master
   candidates into `x_cut`; `1` means use the current candidate only.
 - **Subgradient** — the reduced costs of the linking variables of a subproblem at `x_cut`; they
-  become the cut coefficients. See [Subproblem worker](workers/subproblem-worker.md).
+  become the cut coefficients. See [Subproblem solver](solvers/subproblem-solver.md).
 - **Cut** — a row added to the master of the form
   `sum(alpha_i) >= cost + subgradient . (x - x_cut)`. It keeps the master's `alpha` variables
-  honest. See [Cut](workers/cut.md).
+  honest. See [Cut building](solvers/cut-building.md).
 - **Alpha variable** — a master variable bounding the subproblem cost. `alpha_i` bounds one
   subproblem; the global `alpha` equals their sum and carries the objective coefficient.
 - **Upper bound / lower bound** — the best candidate cost found so far (`ub`) and the master's
@@ -41,8 +41,11 @@ again, until the gap between a lower bound and an upper bound is small enough.
 - **Cold start** — start from scratch; create the alpha variables.
 - **Resume** — continue an interrupted run by loading `last_iteration` JSON state.
 - **Hot start** — restart but reuse a master MPS that already contains the alpha columns.
-- **Cache problems** — `NO_CACHE` keeps subproblem workers in memory; `PER_SUB` rebuilds them
+- **Cache problems** — `NO_CACHE` keeps subproblem solvers in memory; `PER_SUB` rebuilds them
   from disk each iteration and restores a stored basis.
+- **Algorithm driver** — the object that runs the algorithm: `BendersSequential` in one process
+  (`ALGORITHM = SEQUENTIAL`) or `BendersMpi` over MPI ranks (`ALGORITHM = MPI`). See
+  [Implementations](implementations/index.md).
 - **Warm start** — starting a solve from a previously saved basis, done for recreated
   subproblems via `SubproblemBasisCache`.
 

@@ -1,7 +1,8 @@
 # Benders sequential
 
-**Summary:** `BendersSequential` is the single-process Benders implementation. It builds the
-sequential subproblems and cuts managers and runs the master/subproblem loop.
+**Summary:** `BendersSequential` is the single-process Benders implementation, selected by
+`ALGORITHM = SEQUENTIAL`. It builds the sequential subproblems and cuts managers and runs the
+master/subproblem loop.
 
 **Main code:** `src/include/implementations/BendersSequential.h`, `src/implementations/BendersSequential.cpp`
 
@@ -30,8 +31,11 @@ The constructor passes a `SequentialCommunicationStrategy` to `BendersBase` and 
 3. Builds `subproblem_per_cut_indices`, grouping subproblems into `NB_CUTS_PER_ITER` aggregated
    cuts (one group per cut, sizes as even as possible).
 4. Calls `InitializeMasterProblem()`.
-5. Passes the grouping to the cuts manager.
-6. When `CACHE_PROBLEMS` is `NO_CACHE`, distributes (loads) the subproblems now; with `PER_SUB`
+5. Adds the alpha-fixing constraints (`alpha_0 = alpha_j` for each group sharing a cut) through
+   the master manager: the cuts only bound the sum of a group's alphas, so equal alphas split it
+   evenly (the same behavior as xpansion's `BendersMpi`).
+6. Passes the grouping to the cuts manager.
+7. When `CACHE_PROBLEMS` is `NO_CACHE`, distributes (loads) the subproblems now; with `PER_SUB`
    they are recreated from disk at each iteration, so loading here would defeat the cache.
 
 ### One iteration

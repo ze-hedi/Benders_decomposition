@@ -30,11 +30,12 @@ BaseOptions
 
 | Name | Default | Effect |
 |---|---|---|
-| `LOG_LEVEL` | `0` | Solver output log level passed to `SolverMathOpt` |
+| `LOG_LEVEL` | `0` | Solver output log level passed to the solvers |
 | `INPUTROOT` | empty | Study folder; set by the options manager, not read from `options.json` |
 | `OUTPUTROOT` | `input_root/output` | Output folder; a relative value is resolved under `INPUTROOT` |
 | `MASTER_NAME` | `"master"` | Name of the master problem in the coupling map and the MPS file |
-| `SOLVER_NAME` | `"HIGHS"` | Solver name; the options reader accepts `"GLOP"` or `"HIGHS"` |
+| `MASTER_SOLVER` | `HIGHS` | `SolverType` of the master; must solve MIPs unless the master is relaxed |
+| `SUBPROBLEM_SOLVER` | `HIGHS` | `SolverType` of the subproblems; must give LP duals and a basis |
 
 ## `SolverBaseOptions`
 
@@ -66,6 +67,7 @@ cases.
 | `BOUND_ALPHA` | `true` | Fix the global alpha upper bound to the best upper bound before solving |
 | `CACHE_PROBLEMS` | `NO_CACHE` | `NO_CACHE` or `PER_SUB`; `COMPACT` is rejected |
 | `MASTER_FORMULATION` | `INTEGER` | `INTEGER` or `RELAXED` |
+| `ALGORITHM` | `SEQUENTIAL` | `SEQUENTIAL` (one process) or `MPI` (subproblems spread over MPI ranks) |
 | `CSV_NAME` | `"benders_output_trace"` | CSV trace file name |
 | `JSON_FILE` | `"out.json"` | JSON output file name |
 | `LAST_ITERATION_JSON_FILE` | `"last_iteration.json"` | Resume-state file |
@@ -79,11 +81,26 @@ the struct default. The reader also:
 
 - Sets `INPUTROOT` to the study folder (it is not read from the file).
 - Resolves a relative `OUTPUTROOT` under `INPUTROOT`.
-- Accepts `GLOP` and `HIGHS` only for `SOLVER_NAME`.
+- Accepts every `SolverType` name for `MASTER_SOLVER` and `SUBPROBLEM_SOLVER` (`GLOP`, `PDLP`,
+  `HIGHS`, `GSCIP`, `CP_SAT`, `GUROBI`, `XPRESS`), then checks them against their role (see
+  below).
+- Accepts the legacy `SOLVER_NAME` key: it sets each of `MASTER_SOLVER` and
+  `SUBPROBLEM_SOLVER` that is not given by its own key.
 - Accepts `COLD_START`, `RESUME`, or `HOT_START` for `RESTART_MODE`, plus the legacy boolean
   `RESUME` key when `RESTART_MODE` is absent.
 - Ignores a fixed list of legacy xpansion keys and records them as warnings.
 - Suggests a close match for unknown keys and throws `OptionsError` for bad types or ranges.
+
+### Solver role checks
+
+`CheckSolvers()` (in `OptionsReader.cpp`) validates the two solvers once
+`MASTER_FORMULATION` is known:
+
+- An `INTEGER` master with a `MASTER_SOLVER` that does not solve MIPs (`GLOP`, `PDLP`) is an
+  error: use another solver or set `MASTER_FORMULATION` to `RELAXED`.
+- A `SUBPROBLEM_SOLVER` that gives no duals or basis (`CP_SAT`, `PDLP`) is an error, because
+  the cuts and warm starts need them.
+- `SUBPROBLEM_SOLVER = GSCIP` only warns: its duals on LPs may be unreliable.
 
 See [Options readers](utilities/options-readers.md) for the full validation rules.
 
@@ -92,8 +109,9 @@ See [Options readers](utilities/options-readers.md) for the full validation rule
 `common.h` also defines:
 
 - `MasterFormulation` — `INTEGER`, `RELAXED`.
-- `RestartMode` — `COLD_START`, `RESUME`, `HOT_START`. `IsResume()` and
-  `MasterHasAlphaVariables()` encode the meaning of these modes.
+- `BendersAlgorithm` — `SEQUENTIAL`, `MPI`: the driver that runs the algorithm.
+- `RestartMode` (in `utilities/common/RestartMode.h`) — `COLD_START`, `RESUME`, `HOT_START`.
+  `IsResume()` and `MasterHasAlphaVariables()` encode the meaning of these modes.
 - `CacheProblems` — `NO_CACHE`, `PER_SUB`, `COMPACT`.
 - The subproblem weight constants `SUBPROBLEM_WEIGHT_CST_STR` (`"CONSTANT"`) and
   `SUBPROBLEM_WEIGHT_UNIFORM_CST_STR` (`"UNIFORM"`).

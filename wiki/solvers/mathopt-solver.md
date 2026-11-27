@@ -4,27 +4,36 @@
 solver interface the Benders layers expect. It loads MPS files, exposes row/column access and
 modification, solves LPs and MIPs, and manages bases and warm starts.
 
-**Main code:** `src/include/solvers/LinearSolvers.h`, `src/solvers/LinearSolvers.cpp`
+**Main code:** `src/include/solvers/LinearSolvers.h`, `src/solvers/LinearSolvers.cpp`, `src/include/solvers/SolverType.h`
 
-**Parent:** [Entry](entry.md)
-**Related:** [Workers](workers/index.md), [Glossary](glossary.md)
+**Parent:** [Solvers](index.md)
+**Related:** [Solver base](solver.md), [Glossary](../glossary.md)
 
 ## Purpose
 
 Xpansion's Benders code is written against an abstract solver interface (`SolverAbstract`).
 This project replaces that abstraction with one concrete class, `SolverMathOpt`, built on
-`operations_research::math_opt`. Everything above this layer talks to `SolverMathOpt` and never
-to MathOpt directly.
+`operations_research::math_opt`. It is the generic low-level API; the algorithm layers mostly
+use the `Solver` class hierarchy (see [Solver base](solver.md)), which is built directly on
+MathOpt.
 
 ## How it works
 
 ### Backends and types
 
-`SolverType` lists the available MathOpt backends: `GLOP`, `PDLP`, `HIGHS`, `GSCIP`, `CP_SAT`,
-`GUROBI`, and `XPRESS`. The comment notes that `GUROBI` and `XPRESS` are loaded at runtime via
-`dlopen`. `SolverTypeFromString()` parses a name case-insensitively, and `ToMathOptSolverType()`
-maps it to `math_opt::SolverType`. `SOLVER_STATUS` is the xpansion status enum (`OPTIMAL`,
-`INFEASIBLE`, `UNBOUNDED`, `INForUNBOUND`, `UNKNOWN`).
+`SolverType` (in `solvers/SolverType.h`) lists the available MathOpt backends: `GLOP`, `PDLP`,
+`HIGHS`, `GSCIP`, `CP_SAT`, `GUROBI`, and `XPRESS`. The header notes that `GUROBI` and `XPRESS`
+are loaded at runtime via `dlopen`. `SOLVER_TYPE_BY_NAME` maps each upper-case name to its enum
+value. Two capability helpers encode what the Benders algorithm needs:
+
+- `SolvesMip()` — false for `GLOP` and `PDLP`, which handle no integer variables.
+- `GivesDualsAndBasis()` — false for `CP_SAT` and `PDLP`, which give no usable duals or basis
+  (PDLP is a first-order method with approximate duals and no basis).
+
+`SolverTypeFromString()` (in `LinearSolvers.h`) parses a name case-insensitively, and
+`solver_utils::ToMathOptSolverType()` (in `solvers/SolverUtils.h`) maps the enum to
+`math_opt::SolverType`. `SOLVER_STATUS` is the xpansion status enum (`OPTIMAL`, `INFEASIBLE`,
+`UNBOUNDED`, `INForUNBOUND`, `UNKNOWN`).
 
 ### Model and row types
 
@@ -73,7 +82,8 @@ integers 0..4, or all zeros when no basis exists.
 
 | Name | Location | Role |
 |---|---|---|
-| `SolverType` | `LinearSolvers.h` | Enum of the available MathOpt backends |
+| `SolverType` | `solvers/SolverType.h` | Enum of the available MathOpt backends |
+| `SolvesMip` / `GivesDualsAndBasis` | `solvers/SolverType.h` | Backend capability checks |
 | `SOLVER_STATUS` | `LinearSolvers.h` | xpansion status enum plus its string names |
 | `SparseMatrix` | `LinearSolvers.h` | Row/column sparse layout (`starts`, `indices`, `values`) |
 | `BasisStatuses` | `LinearSolvers.h` | Row and column basis statuses as ints |
@@ -108,5 +118,4 @@ integers 0..4, or all zeros when no basis exists.
 ## Open questions
 
 - Whether the runtime-loaded `GUROBI` and `XPRESS` backends work in the current OR-Tools build
-  is not exercised by this code. `src/main.cpp` is now the `benders` entry point that builds a
-  `BendersSequential` without solving, and the options reader only accepts `GLOP`/`HIGHS`.
+  is not exercised by this code.

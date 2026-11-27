@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  ORTOOLS_VERSION: "9.15"
+  ORTOOLS_BUILD: "6755"
+  ORTOOLS_ROOT: ${{ github.workspace }}/.deps/or-tools
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build libopenmpi-dev openmpi-bin
+
+      - name: Cache OR-Tools
+        id: cache-ortools
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ORTOOLS_ROOT }}
+          key: ortools-${{ env.ORTOOLS_VERSION }}.${{ env.ORTOOLS_BUILD }}-ubuntu-24.04
+
+      - name: Download OR-Tools
+        if: steps.cache-ortools.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$ORTOOLS_ROOT"
+          curl -fsSL "https://github.com/google/or-tools/releases/download/v${ORTOOLS_VERSION}/or-tools_amd64_ubuntu-24.04_cpp_v${ORTOOLS_VERSION}.${ORTOOLS_BUILD}.tar.gz" \
+            | tar xz -C "$ORTOOLS_ROOT" --strip-components=1
+
+      # Boost, jsoncpp and googletest are fetched by CMake: keep them between runs
+      - name: Cache fetched sources
+        uses: actions/cache@v4
+        with:
+          path: build-ci/_deps
+          key: deps-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure
+        run: cmake --preset ci
+
+      - name: Build
+        run: cmake --build --preset ci
+
+      - name: Unit tests
+        env:
+          OMPI_MCA_rmaps_base_oversubscribe: "1"
+        run: ctest --preset ci
+
+      - name: Package
+        run: |
+          mkdir -p dist/benders/bin dist/benders/lib
+          cp build-ci/benders dist/benders/bin/
+          cp -P "$ORTOOLS_ROOT"/lib/*.so* dist/benders/lib/
+          printf '#!/bin/sh\nHERE=$(dirname "$(readlink -f "$0")")\nLD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH" exec "$HERE/bin/benders" "$@"\n' > dist/benders/benders
+          chmod +x dist/benders/benders
+          cd dist && zip -qry benders-linux-x64.zip benders
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benders-linux-x64
+          path: dist/benders-linux-x64.zip

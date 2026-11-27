@@ -1,7 +1,7 @@
 #pragma once
 
 #include "benders_managers/BendersCutsManager.hxx"
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 
 class BendersCutsManagerSequential: public BendersCutsManager<BendersCutsManagerSequential>
 {

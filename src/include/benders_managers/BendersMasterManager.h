@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "solvers/MasterSolver.h"
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/BendersStructsDatas.h"
+#include "utilities/common/common.h"
 #include "utilities/interfaces/ILogger.h"
 #include "utilities/output/OutputWriter.h"
 

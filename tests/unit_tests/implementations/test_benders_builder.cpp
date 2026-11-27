@@ -1,6 +1,6 @@
 // ===========================================================================
 //
-//  Unit tests for implementations/BendersBuilder: building a BendersSequential from a
+//  Unit tests for utilities/input/BendersBuilder: building a BendersSequential from a
 //  study folder read by BendersOptionsManager.
 //
 // ===========================================================================
@@ -9,7 +9,7 @@
 #include <fstream>
 #include <unistd.h>
 
-#include "implementations/BendersBuilder.h"
+#include "utilities/input/BendersBuilder.h"
 #include "gtest/gtest.h"
 
 namespace fs = std::filesystem;
@@ -46,7 +46,7 @@ protected:
 TEST_F(BendersBuilderTest, BuildsSequentialWithStudyOptions)
 {
     const BendersOptionsManager manager(study_);
-    const auto benders = BuildBendersSequential(manager);
+    const auto benders = BendersBuilders::BuildBendersSequential(manager);
 
     ASSERT_NE(benders, nullptr);
     EXPECT_EQ(benders->BendersName(), "Sequential");
@@ -56,7 +56,7 @@ TEST_F(BendersBuilderTest, BuildsSequentialWithStudyOptions)
 
 TEST_F(BendersBuilderTest, InputMapComesFromStructure)
 {
-    const auto benders = BuildBendersSequential(BendersOptionsManager(study_));
+    const auto benders = BendersBuilders::BuildBendersSequential(BendersOptionsManager(study_));
 
     // master excluded
     EXPECT_EQ(benders->GetCurrentIterationData().control.nsubproblem, 2);
@@ -65,7 +65,7 @@ TEST_F(BendersBuilderTest, InputMapComesFromStructure)
 TEST_F(BendersBuilderTest, CreatesOutputRootAndLogFiles)
 {
     Write(OPTIONS_FILE_NAME, R"({"OUTPUTROOT": "results"})");
-    const auto benders = BuildBendersSequential(BendersOptionsManager(study_));
+    const auto benders = BendersBuilders::BuildBendersSequential(BendersOptionsManager(study_));
 
     EXPECT_TRUE(fs::is_directory(study_ / "results"));
     EXPECT_TRUE(fs::exists(study_ / "results" / "reportbenders.txt"));
@@ -76,7 +76,7 @@ TEST_F(BendersBuilderTest, WarningsAreLoggedToReport)
 {
     Write(OPTIONS_FILE_NAME, R"({"BATCH_SIZE": 0})");
     {
-        const auto benders = BuildBendersSequential(BendersOptionsManager(study_));
+        const auto benders = BendersBuilders::BuildBendersSequential(BendersOptionsManager(study_));
     }
 
     std::ifstream report(study_ / "output" / "reportbenders.txt");

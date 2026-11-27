@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 
 /*!
  *  \brief Invalid options file: bad JSON, unknown key, wrong type or value out of range.

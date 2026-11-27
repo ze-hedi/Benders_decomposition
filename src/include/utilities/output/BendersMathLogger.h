@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
-#include "utilities/benders_managers_utilities/BendersMethod.h"
+#include "utilities/common/BendersStructsDatas.h"
+#include "utilities/common/BendersMethod.h"
 #include "utilities/interfaces/ILogger.h"
 
 const std::string MATHLOGGERCONTEXT = "Benders";

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-#include "implementations/BendersBuilder.h"
+#include "utilities/input/BendersBuilder.h"
 #include "utilities/options/OptionsReader.h"
 
 namespace
@@ -22,12 +22,12 @@ int Run(const BendersOptionsManager& manager, int argc, char** argv)
     switch (manager.Options().ALGORITHM)
     {
     case BendersAlgorithm::SEQUENTIAL:
-        return Launch(*BuildBendersSequential(manager));
+        return Launch(*BendersBuilders::BuildBendersSequential(manager));
     case BendersAlgorithm::MPI:
     {
         // Outlives the driver: MPI is finalized when it is destroyed
         const mpi::environment environment(argc, argv);
-        return Launch(*BuildBendersMpi(manager, mpi::communicator()));
+        return Launch(*BendersBuilders::BuildBendersMpi(manager, mpi::communicator()));
     }
     }
     return 1;

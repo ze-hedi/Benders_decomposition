@@ -3,7 +3,7 @@
 **Summary:** The shared structs and type aliases that carry iteration state between the
 implementations and the managers.
 
-**Main code:** `src/include/utilities/benders_managers_utilities/BendersStructsDatas.h`, `src/utilities/benders_managers_utilities/BendersStructsDatas.cpp`, `src/include/utilities/benders_managers_utilities/SubproblemCut.h`, `src/include/utilities/benders_managers_utilities/common.h`, `src/include/utilities/interfaces/ILogger.h`
+**Main code:** `src/include/utilities/common/BendersStructsDatas.h`, `src/utilities/common/BendersStructsDatas.cpp`, `src/include/utilities/benders_managers_utilities/SubproblemCut.h`, `src/include/utilities/common/common.h`, `src/include/utilities/interfaces/ILogger.h`
 
 **Parent:** [Utilities](index.md)
 **Related:** [Configuration](../configuration.md), [Output manager](../benders-managers/output-manager.md)

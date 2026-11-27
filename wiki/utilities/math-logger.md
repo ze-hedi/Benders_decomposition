@@ -3,7 +3,7 @@
 **Summary:** The math logger prints the per-iteration Benders numbers (bounds, gaps, simplex
 iterations, timings) as aligned columns to a file or the console.
 
-**Main code:** `src/include/utilities/benders_managers_utilities/BendersMathLogger.h`, `src/utilities/benders_managers_utilities/BendersMathLogger.cpp`, `src/include/utilities/benders_managers_utilities/BendersMethod.h`
+**Main code:** `src/include/utilities/output/BendersMathLogger.h`, `src/utilities/output/BendersMathLogger.cpp`, `src/include/utilities/common/BendersMethod.h`
 
 **Parent:** [Utilities](index.md)
 **Related:** [Output manager](../benders-managers/output-manager.md), [Data structures](data-structures.md)

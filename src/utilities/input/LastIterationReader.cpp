@@ -1,10 +1,10 @@
 
-#include "utilities/benders_managers_utilities/LastIterationReader.h"
+#include "utilities/input/LastIterationReader.h"
 
 #include <fstream>
 #include <iostream>
 
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 
 LastIterationReader::LastIterationReader(const std::filesystem::path& last_iteration_file):
     last_iteration_file_(last_iteration_file)

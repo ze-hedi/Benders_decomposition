@@ -8,8 +8,8 @@
 
 #include "ortools/math_opt/cpp/math_opt.h"
 #include "solvers/LinearSolvers.h"
-#include "solvers/solver_utils.h"
-#include "solvers/types.h"
+#include "solvers/SolverUtils.h"
+#include "utilities/common/types.h"
 
 namespace math_opt = ::operations_research::math_opt;
 

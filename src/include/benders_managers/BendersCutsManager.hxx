@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "benders_managers/BendersMasterManager.h"
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 #include "utilities/benders_managers_utilities/SubproblemCut.h"
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 #include "utilities/interfaces/LogUtils.h"
 
 template<typename Derived>

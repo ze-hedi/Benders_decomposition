@@ -13,10 +13,10 @@
 #include <utility>
 #include <vector>
 
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 #include "utilities/benders_managers_utilities/SubproblemBasisCache.h"
 #include "utilities/benders_managers_utilities/SubproblemCut.h"
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 #include "utilities/helpers/Timer.h"
 #include "utilities/interfaces/ILogger.h"
 #include "utilities/output/OutputWriter.h"

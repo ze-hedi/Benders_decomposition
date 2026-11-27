@@ -3,7 +3,7 @@
 **Summary:** `BuildBendersSequential()` assembles a `BendersSequential` from a
 `BendersOptionsManager`, wiring the console/file logger, the JSON writer, and the math logger.
 
-**Main code:** `src/include/implementations/BendersBuilder.h`, `src/implementations/BendersBuilder.cpp`
+**Main code:** `src/include/utilities/input/BendersBuilder.h`, `src/utilities/input/BendersBuilder.cpp`
 
 **Parent:** [Implementations](index.md)
 **Related:** [Benders sequential](benders-sequential.md), [Options readers](../utilities/options-readers.md)

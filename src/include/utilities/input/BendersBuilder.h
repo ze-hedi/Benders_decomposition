@@ -6,6 +6,8 @@
 #include "implementations/BendersMpi.h"
 #include "utilities/options/BendersOptionsManager.h"
 
+namespace BendersBuilders
+{
 /*!
  *  \brief Build a BendersSequential ready to launch from a study read by BendersOptionsManager.
  *
@@ -24,3 +26,4 @@ std::unique_ptr<BendersSequential> BuildBendersSequential(const BendersOptionsMa
  */
 std::unique_ptr<BendersMpi> BuildBendersMpi(const BendersOptionsManager& manager,
                                             mpi::communicator world);
+} // namespace BendersBuilders

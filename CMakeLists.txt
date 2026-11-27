@@ -38,7 +38,7 @@ endif()
 add_library(interfaces INTERFACE)
 target_include_directories(interfaces INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
-add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/Solver.cpp src/solvers/MasterSolver.cpp src/solvers/SubproblemSolver.cpp src/solvers/solver_utils.cpp)
+add_library(linear_solvers src/solvers/LinearSolvers.cpp src/solvers/Solver.cpp src/solvers/MasterSolver.cpp src/solvers/SubproblemSolver.cpp src/solvers/SolverUtils.cpp)
 target_include_directories(linear_solvers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 target_link_libraries(linear_solvers PUBLIC ortools::ortools)
 
@@ -49,16 +49,16 @@ target_link_libraries(output PUBLIC interfaces jsoncpp_static)
 target_compile_definitions(output PRIVATE PROJECT_VER="${PROJECT_VERSION}")
 
 add_library(benders_managers
-    src/utilities/benders_managers_utilities/common.cpp
+    src/utilities/common/common.cpp
     src/benders_managers/BendersMasterManager.cpp
     src/benders_managers/MasterManager.cpp
     src/benders_managers/BendersCutsManagerSequential.cpp
-    src/utilities/benders_managers_utilities/BendersMathLogger.cpp
+    src/utilities/output/BendersMathLogger.cpp
     src/benders_managers/BendersOutputManager.cpp
-    src/utilities/benders_managers_utilities/BendersStructsDatas.cpp
-    src/utilities/benders_managers_utilities/LastIterationPrinter.cpp
-    src/utilities/benders_managers_utilities/LastIterationReader.cpp
-    src/utilities/benders_managers_utilities/LastIterationWriter.cpp
+    src/utilities/common/BendersStructsDatas.cpp
+    src/utilities/output/LastIterationPrinter.cpp
+    src/utilities/input/LastIterationReader.cpp
+    src/utilities/output/LastIterationWriter.cpp
     src/utilities/benders_managers_utilities/SubproblemBasisCache.cpp)
 target_link_libraries(benders_managers PUBLIC linear_solvers interfaces output jsoncpp_static)
 
@@ -91,7 +91,7 @@ if(BUILD_MPI)
         implementations Boost::mpi Boost::serialization MPI::MPI_CXX)
 endif()
 
-add_library(benders_builder src/implementations/BendersBuilder.cpp)
+add_library(benders_builder src/utilities/input/BendersBuilder.cpp)
 target_link_libraries(benders_builder PUBLIC options implementations)
 target_link_libraries(benders_builder PUBLIC benders_mpi)
 

@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "solvers/RestartMode.h"
+#include "utilities/common/RestartMode.h"
 #include "solvers/Solver.h"
-#include "solvers/solver_utils.h"
-#include "solvers/types.h"
+#include "solvers/SolverUtils.h"
+#include "utilities/common/types.h"
 
 class MasterSolver: public Solver
 {

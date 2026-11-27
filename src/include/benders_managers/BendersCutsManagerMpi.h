@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "benders_managers/BendersCutsManager.hxx"
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 #include "utilities/helpers/Timer.h"
 #include "utilities/mpi_utilities/MpiCommunicationStrategy.h"
 

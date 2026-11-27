@@ -1,4 +1,4 @@
-#include "solvers/solver_utils.h"
+#include "solvers/SolverUtils.h"
 
 #include <cmath>
 #include <limits>

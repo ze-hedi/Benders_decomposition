@@ -3,7 +3,7 @@
 **Summary:** Three classes read, write, and print the `last_iteration` JSON file used to resume
 an interrupted run.
 
-**Main code:** `src/include/utilities/benders_managers_utilities/LastIterationReader.h`, `src/utilities/benders_managers_utilities/LastIterationReader.cpp`, `src/include/utilities/benders_managers_utilities/LastIterationWriter.h`, `src/utilities/benders_managers_utilities/LastIterationWriter.cpp`, `src/include/utilities/benders_managers_utilities/LastIterationPrinter.h`, `src/utilities/benders_managers_utilities/LastIterationPrinter.cpp`
+**Main code:** `src/include/utilities/input/LastIterationReader.h`, `src/utilities/input/LastIterationReader.cpp`, `src/include/utilities/output/LastIterationWriter.h`, `src/utilities/output/LastIterationWriter.cpp`, `src/include/utilities/output/LastIterationPrinter.h`, `src/utilities/output/LastIterationPrinter.cpp`
 
 **Parent:** [Utilities](index.md)
 **Related:** [Output manager](../benders-managers/output-manager.md), [Data structures](data-structures.md)

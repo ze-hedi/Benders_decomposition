@@ -183,11 +183,11 @@ algorithm yet.
 ### As a library
 
 ```cpp
-#include "implementations/BendersBuilder.h"
+#include "utilities/input/BendersBuilder.h"
 #include "utilities/options/BendersOptionsManager.h"
 
 const BendersOptionsManager manager("path/to/study"); // reads and validates every input
-auto benders = BuildBendersSequential(manager);       // creates OUTPUTROOT, logs and writers
+auto benders = BendersBuilders::BuildBendersSequential(manager); // creates OUTPUTROOT, logs and writers
 benders->launch();
 
 const auto best = benders->BestIterationWorkerMaster(); // best_ub, lb, x_cut, ...

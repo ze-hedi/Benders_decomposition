@@ -1,4 +1,4 @@
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 
 /*!
  * \brief Get point

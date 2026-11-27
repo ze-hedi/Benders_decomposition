@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "utilities/benders_managers_utilities/SubproblemCut.h"
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 #include "utilities/interfaces/ILogger.h"
 #include "solvers/LinearSolvers.h"
 

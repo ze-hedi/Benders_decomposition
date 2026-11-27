@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 
-#include "utilities/benders_managers_utilities/BendersMathLogger.h"
+#include "utilities/output/BendersMathLogger.h"
 #include "utilities/logger/MathLogger.h"
 #include "gtest/gtest.h"
 #include "test_utils/LogPrefixManip.h"

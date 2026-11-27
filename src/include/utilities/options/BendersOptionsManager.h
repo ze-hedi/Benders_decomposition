@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 
 inline const std::string OPTIONS_FILE_NAME = "options.json";
 inline const std::string STRUCTURE_FILE_NAME = "structure.txt";

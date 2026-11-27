@@ -4,7 +4,7 @@
 responsibility on top of the one below: the MathOpt binding, the per-problem workers, the
 coordination managers, and the algorithm implementations.
 
-**Main code:** `src/solvers/LinearSolvers.cpp`, `src/workers/Worker.cpp`, `src/workers/WorkerMaster.cpp`, `src/benders_managers/BendersMasterManager.cpp`, `src/implementations/BendersBase.cpp`, `src/implementations/BendersSequential.cpp`, `src/implementations/BendersBuilder.cpp`, `src/utilities/options/OptionsReader.cpp`
+**Main code:** `src/solvers/LinearSolvers.cpp`, `src/workers/Worker.cpp`, `src/workers/WorkerMaster.cpp`, `src/benders_managers/BendersMasterManager.cpp`, `src/implementations/BendersBase.cpp`, `src/implementations/BendersSequential.cpp`, `src/utilities/input/BendersBuilder.cpp`, `src/utilities/options/OptionsReader.cpp`
 
 **Parent:** [Entry](entry.md)
 **Related:** [Glossary](glossary.md), [Configuration](configuration.md)
@@ -50,7 +50,7 @@ Each layer's job:
 ## How data flows
 
 The central object is `CurrentIterationData` (defined in
-`utilities/benders_managers_utilities/BendersStructsDatas.h`). `BendersBase` owns it and passes
+`utilities/common/BendersStructsDatas.h`). `BendersBase` owns it and passes
 it by reference to the managers, so every layer reads and writes the same iteration state.
 
 ```text

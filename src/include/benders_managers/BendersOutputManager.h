@@ -4,8 +4,8 @@
 #include <fstream>
 #include <memory>
 
-#include "utilities/benders_managers_utilities/BendersMathLogger.h"
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/output/BendersMathLogger.h"
+#include "utilities/common/BendersStructsDatas.h"
 #include "utilities/interfaces/ILogger.h"
 #include "utilities/output/OutputWriter.h"
 

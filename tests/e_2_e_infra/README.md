@@ -59,7 +59,7 @@ sets `ALGORITHM` to `MPI` in the copied `options.json`.
 ### Study `options.json` (input)
 
 Keys mirror `BendersBaseOptions` (see
-`src/include/utilities/benders_managers_utilities/common.h`):
+`src/include/utilities/common/common.h`):
 
 | key                | meaning                                   |
 |--------------------|-------------------------------------------|

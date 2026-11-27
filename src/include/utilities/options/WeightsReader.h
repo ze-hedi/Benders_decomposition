@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 
-#include "utilities/benders_managers_utilities/common.h"
+#include "utilities/common/common.h"
 #include "utilities/options/OptionsReader.h"
 
 inline const std::string WEIGHT_SUM_CST_STR = "WEIGHT_SUM";

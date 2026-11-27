@@ -1,11 +1,11 @@
 # Configuration
 
 **Summary:** The run is configured through option structs defined in
-`utilities/benders_managers_utilities/common.h`. The defaults now follow xpansion's
+`utilities/common/common.h`. The defaults now follow xpansion's
 `SimulationOptions`, and the structs are populated from an `options.json` file by the options
 readers.
 
-**Main code:** `src/include/utilities/benders_managers_utilities/common.h`, `src/utilities/options/OptionsReader.cpp`
+**Main code:** `src/include/utilities/common/common.h`, `src/utilities/options/OptionsReader.cpp`
 
 **Parent:** [Entry](entry.md)
 **Related:** [Architecture](architecture.md), [Options readers](utilities/options-readers.md), [Benders base](implementations/benders-base.md)

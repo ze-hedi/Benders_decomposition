@@ -12,9 +12,9 @@
 #include <sstream>
 #include <string>
 
-#include "utilities/benders_managers_utilities/LastIterationPrinter.h"
-#include "utilities/benders_managers_utilities/LastIterationReader.h"
-#include "utilities/benders_managers_utilities/LastIterationWriter.h"
+#include "utilities/output/LastIterationPrinter.h"
+#include "utilities/input/LastIterationReader.h"
+#include "utilities/output/LastIterationWriter.h"
 #include "gtest/gtest.h"
 #include "test_utils/LogDataUtils.h"
 #include "test_utils/LoggerStub.h"

@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "utilities/benders_managers_utilities/BendersStructsDatas.h"
+#include "utilities/common/BendersStructsDatas.h"
 #include "gtest/gtest.h"
 
 // ---------------------------------------------------------------------------

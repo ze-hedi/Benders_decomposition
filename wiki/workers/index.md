@@ -31,4 +31,4 @@ variables and cut machinery. `SubproblemWorker` adds the subgradient view used t
 | `SubProblemNamesInCut` | List of `(subproblem name, gathered position)` pairs for one aggregated cut |
 
 `CouplingMap` (the map of problem name to `VariableMap`) lives in
-`utilities/benders_managers_utilities/common.h`, not in `types.h`.
+`utilities/common/common.h`, not in `types.h`.

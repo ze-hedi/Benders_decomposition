@@ -15,9 +15,9 @@
 #include <sstream>
 #include <string>
 
-#include "utilities/benders_managers_utilities/BendersMathLogger.h"
-#include "utilities/benders_managers_utilities/LastIterationReader.h"
-#include "utilities/benders_managers_utilities/LastIterationWriter.h"
+#include "utilities/output/BendersMathLogger.h"
+#include "utilities/input/LastIterationReader.h"
+#include "utilities/output/LastIterationWriter.h"
 #include "gtest/gtest.h"
 #include "utilities/output/OutputWriter.h"
 #include "test_utils/LoggerStub.h"

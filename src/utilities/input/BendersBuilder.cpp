@@ -1,9 +1,9 @@
-#include "implementations/BendersBuilder.h"
+#include "utilities/input/BendersBuilder.h"
 
 #include <filesystem>
 #include <iostream>
 
-#include "utilities/benders_managers_utilities/BendersMethod.h"
+#include "utilities/common/BendersMethod.h"
 #include "utilities/interfaces/Clock.h"
 #include "utilities/logger/Master.h"
 #include "utilities/logger/MathLogger.h"
@@ -50,6 +50,8 @@ std::shared_ptr<MathLoggerDriver> BuildMathLogger(const BendersBaseOptions& opti
 }
 } // namespace
 
+namespace BendersBuilders
+{
 std::unique_ptr<BendersSequential> BuildBendersSequential(const BendersOptionsManager& manager)
 {
     const auto& options = manager.Options();
@@ -104,3 +106,4 @@ std::unique_ptr<BendersMpi> BuildBendersMpi(const BendersOptionsManager& manager
     benders->set_input_map(manager.Coupling());
     return benders;
 }
+} // namespace BendersBuilders

@@ -5,9 +5,9 @@
 #include <fstream>
 #include <utility>
 
-#include "utilities/benders_managers_utilities/LastIterationPrinter.h"
-#include "utilities/benders_managers_utilities/LastIterationReader.h"
-#include "utilities/benders_managers_utilities/LastIterationWriter.h"
+#include "utilities/output/LastIterationPrinter.h"
+#include "utilities/input/LastIterationReader.h"
+#include "utilities/output/LastIterationWriter.h"
 #include "utilities/interfaces/LogUtils.h"
 #include "utilities/output/OutputWriter.h"
 

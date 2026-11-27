@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "utilities/mpi_utilities/ICommunicationStrategy.h"
-#include "utilities/mpi_utilities/common_mpi.h"
+#include "utilities/mpi_utilities/CommonMpi.h"
 
 /**
  * @brief Communication strategy for multi-process execution over MPI.

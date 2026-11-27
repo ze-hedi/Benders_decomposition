@@ -13,8 +13,8 @@ Two drivers share the same algorithm:
   (Boost.MPI).
 
 > **Status:** the library and both drivers are complete and tested end to end. The `benders`
-> command-line tool reads and validates a study, then builds the sequential driver, but does not
-> run it yet.
+> command-line tool reads a study and runs the driver chosen by `ALGORITHM` (`SEQUENTIAL` or
+> `MPI`).
 
 ## The algorithm
 

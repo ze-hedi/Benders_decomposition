@@ -5,8 +5,12 @@ same contract as antares-xpansion. The result JSON schema expected in
 context.outputs is documented in tests/e_2_e_infra/README.md.
 """
 
+from pathlib import Path
+
 import numpy as np
 from behave import then
+from steps import read_options
+from utils_functions import read_json_file
 
 
 def assert_dict_allclose(actual, expected, rtol=1e-06, atol=0):
@@ -83,6 +87,37 @@ def check_number_of_iterations(context, n):
     assert_outputs_available(context)
     actual = len(context.outputs["iterations"])
     assert actual == n, f"Expected {n} iterations, got {actual}"
+
+
+@then("the best iteration is {n:d}")
+def check_best_iteration(context, n):
+    assert_outputs_available(context)
+    actual = context.outputs["solution"]["iteration"]
+    assert actual == n, f"Expected best iteration {n}, got {actual}"
+
+
+def output_path(context, file_name: str) -> Path:
+    """A file of the run, resolved against OUTPUTROOT as the CLI does."""
+    output_root = read_options(context.tmp_study).get("OUTPUTROOT", "output")
+    return Path(context.tmp_study) / output_root / file_name
+
+
+@then("the last iteration file has its last iteration at {last:d} and its best at {best:d}")
+def check_last_iteration_file(context, last, best):
+    options = read_options(context.tmp_study)
+    content = read_json_file(
+      output_path(context, options.get("LAST_ITERATION_JSON_FILE", "last_iteration.json")))
+    assert content["last"]["it"] == last, f"Expected last iteration {last}, got {content['last']['it']}"
+    assert content["best_iteration"]["it"] == best, (
+        f"Expected best iteration {best}, got {content['best_iteration']['it']}"
+    )
+
+
+@then('"{file_name}" contains "{text}" {n:d} times')
+@then('"{file_name}" contains "{text}" {n:d} time')
+def check_file_contains_n_times(context, file_name, text, n):
+    actual = output_path(context, file_name).read_text().count(text)
+    assert actual == n, f"Expected '{text}' {n} time(s) in {file_name}, found {actual}"
 
 
 @then("the solution is")

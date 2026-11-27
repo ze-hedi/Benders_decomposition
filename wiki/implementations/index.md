@@ -32,5 +32,5 @@ BendersSequential
 ```
 
 `BendersBase::launch()` is pure virtual, so the derived class decides how to build problems and
-run the loop. `BendersSequentialBuilder` sits above this and assembles the object from a
+run the loop. `BendersBuilder` sits above this and assembles the object from a
 `BendersOptionsManager`.

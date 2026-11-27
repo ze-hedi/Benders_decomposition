@@ -16,7 +16,7 @@ bottom up: the MathOpt solver wrapper, the workers that hold one problem each, t
 managers that coordinate master and subproblems, and the algorithm implementations. Only one
 implementation exists so far, `BendersSequential`, which runs the whole algorithm in a single
 process. A study-folder input layer (`BendersOptionsManager` and the options readers) plus a
-builder (`BendersSequentialBuilder`) assemble the run from `options.json` and `structure.txt`;
+builder (`BendersBuilder`) assemble the run from `options.json` and `structure.txt`;
 the entry point builds the object but does not launch it yet. MPI groundwork
 (`MpiCommunicationStrategy` and a subproblem-data serialization hook) has been added, but there
 is no MPI Benders implementation yet. Supporting code (logging, JSON output, resume/restart

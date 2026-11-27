@@ -3,7 +3,7 @@
 **Summary:** `BuildBendersSequential()` assembles a `BendersSequential` from a
 `BendersOptionsManager`, wiring the console/file logger, the JSON writer, and the math logger.
 
-**Main code:** `src/include/implementations/BendersSequentialBuilder.h`, `src/implementations/BendersSequentialBuilder.cpp`
+**Main code:** `src/include/implementations/BendersBuilder.h`, `src/implementations/BendersBuilder.cpp`
 
 **Parent:** [Implementations](index.md)
 **Related:** [Benders sequential](benders-sequential.md), [Options readers](../utilities/options-readers.md)
@@ -36,10 +36,10 @@ namespace inside the `.cpp`.
 
 | Name | Location | Role |
 |---|---|---|
-| `BuildBendersSequential` | `BendersSequentialBuilder.cpp` | Builds the ready-to-launch object |
-| `BuildLogger` | `BendersSequentialBuilder.cpp` | Console + `reportbenders.txt` |
-| `BuildWriter` | `BendersSequentialBuilder.cpp` | Resume-aware JSON writer |
-| `BuildMathLogger` | `BendersSequentialBuilder.cpp` | File (and optional console) math logger |
+| `BuildBendersSequential` | `BendersBuilder.cpp` | Builds the ready-to-launch object |
+| `BuildLogger` | `BendersBuilder.cpp` | Console + `reportbenders.txt` |
+| `BuildWriter` | `BendersBuilder.cpp` | Resume-aware JSON writer |
+| `BuildMathLogger` | `BendersBuilder.cpp` | File (and optional console) math logger |
 
 ## Edge cases and unusual behavior
 

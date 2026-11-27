@@ -1,6 +1,6 @@
 // ===========================================================================
 //
-//  Unit tests for implementations/BendersSequentialBuilder: building a BendersSequential from a
+//  Unit tests for implementations/BendersBuilder: building a BendersSequential from a
 //  study folder read by BendersOptionsManager.
 //
 // ===========================================================================
@@ -9,14 +9,14 @@
 #include <fstream>
 #include <unistd.h>
 
-#include "implementations/BendersSequentialBuilder.h"
+#include "implementations/BendersBuilder.h"
 #include "gtest/gtest.h"
 
 namespace fs = std::filesystem;
 
 namespace
 {
-class BendersSequentialBuilderTest: public ::testing::Test
+class BendersBuilderTest: public ::testing::Test
 {
 protected:
     fs::path study_;
@@ -24,7 +24,7 @@ protected:
     void SetUp() override
     {
         study_ = fs::temp_directory_path()
-                 / ("benders_sequential_builder_test_" + std::to_string(getpid()));
+                 / ("benders_builder_test_" + std::to_string(getpid()));
         fs::create_directories(study_);
         Write(OPTIONS_FILE_NAME, R"({"SUBPROBLEM_SOLVER": "GLOP"})");
         Write(STRUCTURE_FILE_NAME, "master x 0\nSP1.mps x 0\nSP2.mps x 0\n");
@@ -43,7 +43,7 @@ protected:
 };
 } // namespace
 
-TEST_F(BendersSequentialBuilderTest, BuildsSequentialWithStudyOptions)
+TEST_F(BendersBuilderTest, BuildsSequentialWithStudyOptions)
 {
     const BendersOptionsManager manager(study_);
     const auto benders = BuildBendersSequential(manager);
@@ -54,7 +54,7 @@ TEST_F(BendersSequentialBuilderTest, BuildsSequentialWithStudyOptions)
     EXPECT_EQ(benders->Options().INPUTROOT, study_.string());
 }
 
-TEST_F(BendersSequentialBuilderTest, InputMapComesFromStructure)
+TEST_F(BendersBuilderTest, InputMapComesFromStructure)
 {
     const auto benders = BuildBendersSequential(BendersOptionsManager(study_));
 
@@ -62,7 +62,7 @@ TEST_F(BendersSequentialBuilderTest, InputMapComesFromStructure)
     EXPECT_EQ(benders->GetCurrentIterationData().control.nsubproblem, 2);
 }
 
-TEST_F(BendersSequentialBuilderTest, CreatesOutputRootAndLogFiles)
+TEST_F(BendersBuilderTest, CreatesOutputRootAndLogFiles)
 {
     Write(OPTIONS_FILE_NAME, R"({"OUTPUTROOT": "results"})");
     const auto benders = BuildBendersSequential(BendersOptionsManager(study_));
@@ -72,7 +72,7 @@ TEST_F(BendersSequentialBuilderTest, CreatesOutputRootAndLogFiles)
     EXPECT_TRUE(fs::exists(study_ / "results" / "benders_solver.log"));
 }
 
-TEST_F(BendersSequentialBuilderTest, WarningsAreLoggedToReport)
+TEST_F(BendersBuilderTest, WarningsAreLoggedToReport)
 {
     Write(OPTIONS_FILE_NAME, R"({"BATCH_SIZE": 0})");
     {

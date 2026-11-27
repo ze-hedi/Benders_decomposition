@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-#include "implementations/BendersSequentialBuilder.h"
+#include "implementations/BendersBuilder.h"
 #include "utilities/options/OptionsReader.h"
 
 namespace

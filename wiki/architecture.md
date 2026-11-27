@@ -4,7 +4,7 @@
 responsibility on top of the one below: the MathOpt binding, the per-problem workers, the
 coordination managers, and the algorithm implementations.
 
-**Main code:** `src/solvers/LinearSolvers.cpp`, `src/workers/Worker.cpp`, `src/workers/WorkerMaster.cpp`, `src/benders_managers/BendersMasterManager.cpp`, `src/implementations/BendersBase.cpp`, `src/implementations/BendersSequential.cpp`, `src/implementations/BendersSequentialBuilder.cpp`, `src/utilities/options/OptionsReader.cpp`
+**Main code:** `src/solvers/LinearSolvers.cpp`, `src/workers/Worker.cpp`, `src/workers/WorkerMaster.cpp`, `src/benders_managers/BendersMasterManager.cpp`, `src/implementations/BendersBase.cpp`, `src/implementations/BendersSequential.cpp`, `src/implementations/BendersBuilder.cpp`, `src/utilities/options/OptionsReader.cpp`
 
 **Parent:** [Entry](entry.md)
 **Related:** [Glossary](glossary.md), [Configuration](configuration.md)
@@ -76,7 +76,7 @@ stale handle elsewhere.
   each iteration (`PER_SUB`) with a stored basis as a warm start. The compact mode is rejected.
 - **No plugin and no micro-iterations.** These xpansion features are intentionally absent.
 - **Study-folder input.** `BendersOptionsManager` and the readers in `utilities/options/` read
-  `options.json`, `structure.txt`, and an optional weights file, and `BendersSequentialBuilder`
+  `options.json`, `structure.txt`, and an optional weights file, and `BendersBuilder`
   assembles the run from them. The entry point builds the object but does not launch it yet.
 - **MPI groundwork.** The communication strategies moved to `utilities/mpi_utilities/`, an
   `MpiCommunicationStrategy` over Boost.MPI was added, and `PlainData::SubProblemData` gained a

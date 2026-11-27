@@ -91,7 +91,7 @@ if(BUILD_MPI)
         implementations Boost::mpi Boost::serialization MPI::MPI_CXX)
 endif()
 
-add_library(benders_builder src/implementations/BendersSequentialBuilder.cpp)
+add_library(benders_builder src/implementations/BendersBuilder.cpp)
 target_link_libraries(benders_builder PUBLIC options implementations)
 target_link_libraries(benders_builder PUBLIC benders_mpi)
 

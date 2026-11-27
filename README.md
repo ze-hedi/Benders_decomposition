@@ -183,7 +183,7 @@ algorithm yet.
 ### As a library
 
 ```cpp
-#include "implementations/BendersSequentialBuilder.h"
+#include "implementations/BendersBuilder.h"
 #include "utilities/options/BendersOptionsManager.h"
 
 const BendersOptionsManager manager("path/to/study"); // reads and validates every input

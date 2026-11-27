@@ -2,4 +2,3 @@ build*/
 .cache/
 compile_commands.json
 __pycache__/
-tests/e_2_e_infra/build_config.yaml

@@ -1,0 +1,84 @@
+name: CI Oracle Linux 8
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  ORTOOLS_VERSION: "9.15"
+  ORTOOLS_BUILD: "6755"
+  ORTOOLS_ROOT: ${{ github.workspace }}/.deps/or-tools
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: oraclelinux:8
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # git, tar and zstd are needed by checkout and cache inside the container
+      - name: Install system packages
+        run: |
+          dnf install -y dnf-plugins-core
+          dnf config-manager --enable ol8_codeready_builder
+          dnf install -y git tar gzip zstd zip cmake ninja-build gcc-toolset-13 openmpi-devel
+          # gcc 8 has no C++20: use the toolset compiler, and put mpirun on the PATH
+          echo /opt/rh/gcc-toolset-13/root/usr/bin >> "$GITHUB_PATH"
+          echo /usr/lib64/openmpi/bin >> "$GITHUB_PATH"
+
+      - uses: actions/checkout@v4
+
+      - name: Cache OR-Tools
+        id: cache-ortools
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.ORTOOLS_ROOT }}
+          key: ortools-${{ env.ORTOOLS_VERSION }}.${{ env.ORTOOLS_BUILD }}-almalinux-8.10
+
+      # The AlmaLinux 8 archive is built for RHEL 8, which Oracle Linux 8 is compatible with
+      - name: Download OR-Tools
+        if: steps.cache-ortools.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$ORTOOLS_ROOT"
+          curl -fsSL "https://github.com/google/or-tools/releases/download/v${ORTOOLS_VERSION}/or-tools_x86_64_AlmaLinux-8.10_cpp_v${ORTOOLS_VERSION}.${ORTOOLS_BUILD}.tar.gz" \
+            | tar xz -C "$ORTOOLS_ROOT" --strip-components=1
+
+      # Boost, jsoncpp and googletest are fetched by CMake: keep them between runs
+      - name: Cache fetched sources
+        uses: actions/cache@v4
+        with:
+          path: build-ci/_deps
+          key: deps-ol8-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure
+        run: cmake --preset ci
+
+      - name: Build
+        run: cmake --build --preset ci
+
+      - name: Unit tests
+        env:
+          # The container runs as root, and has fewer cores than the MPI tests ask for
+          OMPI_ALLOW_RUN_AS_ROOT: "1"
+          OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: "1"
+          OMPI_MCA_rmaps_base_oversubscribe: "1"
+        run: ctest --preset ci
+
+      - name: Package
+        run: |
+          mkdir -p dist/benders/bin dist/benders/lib
+          cp build-ci/benders dist/benders/bin/
+          # RHEL archives may install their libraries in lib64
+          for d in lib lib64; do
+            if [ -d "$ORTOOLS_ROOT/$d" ]; then cp -P "$ORTOOLS_ROOT/$d"/*.so* dist/benders/lib/; fi
+          done
+          printf '#!/bin/sh\nHERE=$(dirname "$(readlink -f "$0")")\nLD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH" exec "$HERE/bin/benders" "$@"\n' > dist/benders/benders
+          chmod +x dist/benders/benders
+          cd dist && zip -qry benders-ol8-x64.zip benders
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benders-ol8-x64
+          path: dist/benders-ol8-x64.zip

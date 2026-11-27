@@ -20,26 +20,15 @@ def study_path_is(context, study):
 
 @given('solver is "{solver}"')
 def set_solver(context, solver):
-    context.solver = solver
     update_option(context.tmp_study, "MASTER_SOLVER", solver)
     update_option(context.tmp_study, "SUBPROBLEM_SOLVER", solver)
 
 
-@given("the max iterations is {n:d}")
-def set_max_iterations(context, n):
-    update_option(context.tmp_study, "MAX_ITERATIONS", n)
-
-
-@given("the batch size is {n:d}")
-def set_batch_size(context, n):
-    update_option(context.tmp_study, "BATCH_SIZE", n)
+@given("the number of cuts per iteration is {n:d}")
+def set_nb_cuts_per_iter(context, n):
+    update_option(context.tmp_study, "NB_CUTS_PER_ITER", n)
 
 
 @given("the cache problems level is {level}")
 def set_cache_problems_level(context, level):
     update_option(context.tmp_study, "CACHE_PROBLEMS", level)
-
-
-@given('the restart mode is "{mode}"')
-def set_restart_mode(context, mode):
-    update_option(context.tmp_study, "RESTART_MODE", mode)

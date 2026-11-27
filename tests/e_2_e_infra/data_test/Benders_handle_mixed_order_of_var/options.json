@@ -1,7 +1,7 @@
 {
     "LOG_LEVEL": 0,
     "MAX_ITERATIONS": -1,
-    "GAP": 1e-06,
+    "ABSOLUTE_GAP": 1e-06,
     "AGGREGATION": false,
     "OUTPUTROOT": "./outputs/",
     "TRACE": true,

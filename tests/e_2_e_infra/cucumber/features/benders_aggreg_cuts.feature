@@ -1,14 +1,13 @@
 Feature: NB_CUTS_PER_ITER in options.json file sets the number cuts to add to the master problem at every iteration. We test that we converge to the right overall cost and with the correct solution
 
-# Adapted from antares-xpansion benders_aggreg_cuts.feature: the MPI Examples
-# rows (procs = 3 and 5) are dropped until an MPI build of the Benders CLI
-# exists; only sequential rows are kept.
+# Adapted from antares-xpansion benders_aggreg_cuts.feature. Rows with procs > 1
+# run with ALGORITHM = MPI.
 
 @short @full-launch
-Scenario Outline: Benders converges to the same solution across batch and cache configurations
+Scenario Outline: Benders converges to the same solution across cut aggregation and cache configurations
     Given the study path is "data_test/test_cut_aggregation_ieee96_10inc"
     And the cache problems level is <cache_level>
-    And the batch size is <batch_size>
+    And the number of cuts per iteration is <nb_cuts>
     When I run benders with <procs> proc(s)
     Then the simulation succeeds
     And the expected overall cost is 5731.9596696788394
@@ -31,8 +30,12 @@ Scenario Outline: Benders converges to the same solution across batch and cache 
       | z[LINE-330-319]   | 1.0   |
 
     Examples:
-      | cache_level | batch_size | procs |
+      | cache_level | nb_cuts    | procs |
       | NO_CACHE    | 0          | 1     |
       | NO_CACHE    | 5          | 1     |
       | PER_SUB     | 0          | 1     |
       | PER_SUB     | 5          | 1     |
+      | NO_CACHE    | 0          | 3     |
+      | NO_CACHE    | 5          | 5     |
+      | PER_SUB     | 0          | 3     |
+      | PER_SUB     | 5          | 5     |

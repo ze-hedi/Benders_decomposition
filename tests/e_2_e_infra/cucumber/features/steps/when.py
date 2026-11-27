@@ -10,18 +10,23 @@ from steps import read_options, update_option
 from utils_functions import get_benders_executable, get_mpi_command, read_json_file
 
 
-def build_benders_command(context, nproc: int = 1, option_file: str = "options.json"):
+def build_benders_command(nproc: int):
     command = get_mpi_command(nproc=nproc)
     command.append(str(get_benders_executable()))
-    command.append(option_file)
+    # The CLI takes the study folder and reads its options.json; cwd is the study
+    command.append(".")
     return command
 
 
-def process_command(context, nproc: int, option_file: str, command_builder):
+def process_command(context, nproc: int, option_file: str):
     """Run the built command with cwd = temporary study directory, capture
     return code / stdout / stderr and load the JSON output declared in the
     study options (JSON_FILE)."""
-    command = command_builder(context, nproc, option_file)
+    if option_file != "options.json":
+        shutil.copy(Path(context.tmp_study) / option_file, Path(context.tmp_study) / "options.json")
+    if nproc > 1:
+        update_option(context.tmp_study, "ALGORITHM", "MPI")
+    command = build_benders_command(nproc)
     print(f"Running command: {' '.join(command)}")
     old_cwd = os.getcwd()
     os.chdir(context.tmp_study)
@@ -40,7 +45,9 @@ def process_command(context, nproc: int, option_file: str, command_builder):
             print("*********************** End stderr ***********************")
         options = read_options(context.tmp_study)
         if "JSON_FILE" in options:
-            output_file_path = Path(context.tmp_study) / options["JSON_FILE"]
+            # Resolved against OUTPUTROOT, as the CLI does (default "output")
+            output_root = Path(context.tmp_study) / options.get("OUTPUTROOT", "output")
+            output_file_path = output_root / options["JSON_FILE"]
             if output_file_path.is_file():
                 context.outputs = read_json_file(output_file_path)
             else:
@@ -71,10 +78,10 @@ def set_resume_mode(context, resume_mode):
 @when("I run benders")
 @when('I run benders with "{option_file}" as option file')
 def run_benders(context, option_file: str = "options.json"):
-    process_command(context, 1, option_file, build_benders_command)
+    process_command(context, 1, option_file)
 
 
 @when("I run benders with {n:d} proc(s)")
 @when('I run benders with {n:d} proc(s) and "{option_file}" as option file')
 def run_benders_mpi(context, n, option_file: str = "options.json"):
-    process_command(context, n, option_file, build_benders_command)
+    process_command(context, n, option_file)

@@ -70,10 +70,9 @@ jobs:
         run: |
           mkdir -p dist/benders/bin dist/benders/lib
           cp build-ci/benders dist/benders/bin/
-          # RHEL archives may install their libraries in lib64
-          for d in lib lib64; do
-            if [ -d "$ORTOOLS_ROOT/$d" ]; then cp -P "$ORTOOLS_ROOT/$d"/*.so* dist/benders/lib/; fi
-          done
+          # The RHEL archive installs its libraries in lib64, its lib/ holds no library
+          find "$ORTOOLS_ROOT"/lib* -maxdepth 1 -name '*.so*' -exec cp -P {} dist/benders/lib/ \;
+          ls dist/benders/lib/libortools.so
           printf '#!/bin/sh\nHERE=$(dirname "$(readlink -f "$0")")\nLD_LIBRARY_PATH="$HERE/lib:$LD_LIBRARY_PATH" exec "$HERE/bin/benders" "$@"\n' > dist/benders/benders
           chmod +x dist/benders/benders
           cd dist && zip -qry benders-ol8-x64.zip benders

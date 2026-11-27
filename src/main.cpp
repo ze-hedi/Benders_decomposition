@@ -1,9 +1,38 @@
 // Entry point: benders <input_root>
-//   Reads the study inputs through BendersOptionsManager, builds a BendersSequential and runs it.
+//   Reads the study inputs through BendersOptionsManager, builds the driver chosen by ALGORITHM
+//   and runs it. ALGORITHM = MPI is launched with mpiexec.
 #include <iostream>
+#include <memory>
 
 #include "implementations/BendersSequentialBuilder.h"
 #include "utilities/options/OptionsReader.h"
+
+namespace
+{
+// Runs the driver and returns the process exit code
+int Launch(BendersBase& benders)
+{
+    benders.launch();
+    // launch() logs the error and still writes the outputs
+    return benders.isExceptionRaised() ? 1 : 0;
+}
+
+int Run(const BendersOptionsManager& manager, int argc, char** argv)
+{
+    switch (manager.Options().ALGORITHM)
+    {
+    case BendersAlgorithm::SEQUENTIAL:
+        return Launch(*BuildBendersSequential(manager));
+    case BendersAlgorithm::MPI:
+    {
+        // Outlives the driver: MPI is finalized when it is destroyed
+        const mpi::environment environment(argc, argv);
+        return Launch(*BuildBendersMpi(manager, mpi::communicator()));
+    }
+    }
+    return 1;
+}
+} // namespace
 
 int main(int argc, char** argv)
 {
@@ -16,13 +45,7 @@ int main(int argc, char** argv)
     try
     {
         const BendersOptionsManager manager(argv[1]);
-        const auto benders = BuildBendersSequential(manager);
-        benders->launch();
-        if (benders->isExceptionRaised())
-        {
-            // launch() logs the error and still writes the outputs
-            return 1;
-        }
+        return Run(manager, argc, argv);
     }
     catch (const OptionsError& error)
     {
@@ -34,5 +57,4 @@ int main(int argc, char** argv)
         std::cerr << "error: " << error.what() << "\n";
         return 1;
     }
-    return 0;
 }

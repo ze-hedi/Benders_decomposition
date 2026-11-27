@@ -262,6 +262,13 @@ TEST(OptionsReaderTest, SolverNameDoesNotOverrideRoleSolvers)
     EXPECT_EQ(reversed.SUBPROBLEM_SOLVER, SolverType::GLOP);
 }
 
+TEST(OptionsReaderTest, AlgorithmIsRead)
+{
+    EXPECT_EQ(Read("{}").options.ALGORITHM, BendersAlgorithm::SEQUENTIAL);
+    EXPECT_EQ(Read(R"({"ALGORITHM": "mpi"})").options.ALGORITHM, BendersAlgorithm::MPI);
+    EXPECT_NE(ErrorOf(R"({"ALGORITHM": "threads"})").find("ALGORITHM"), std::string::npos);
+}
+
 TEST(OptionsReaderTest, BadEnumValueThrows)
 {
     EXPECT_NE(ErrorOf(R"({"MASTER_FORMULATION": "foo"})").find("MASTER_FORMULATION"),

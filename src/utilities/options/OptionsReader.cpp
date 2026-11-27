@@ -227,6 +227,16 @@ std::map<std::string, Setter> BuildSetters()
                                                       {{"INTEGER", MasterFormulation::INTEGER},
                                                        {"RELAXED", MasterFormulation::RELAXED}});
                }));
+    add("ALGORITHM",
+        Field_("ALGORITHM",
+               &BendersBaseOptions::ALGORITHM,
+               [](const std::string& key, const Json::Value& value)
+               {
+                   return ReadEnum<BendersAlgorithm>(key,
+                                                     value,
+                                                     {{"SEQUENTIAL", BendersAlgorithm::SEQUENTIAL},
+                                                      {"MPI", BendersAlgorithm::MPI}});
+               }));
     add("NB_CUTS_PER_ITER",
         [](const Json::Value& value, BendersBaseOptions& options)
         {

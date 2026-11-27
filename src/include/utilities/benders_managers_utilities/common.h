@@ -26,6 +26,13 @@ enum class MasterFormulation
     RELAXED
 };
 
+// Driver that runs the algorithm: one process, or the subproblems spread over MPI ranks
+enum class BendersAlgorithm
+{
+    SEQUENTIAL,
+    MPI
+};
+
 enum class CacheProblems
 {
     NO_CACHE,
@@ -97,6 +104,7 @@ struct BendersBaseOptions: public SolverBaseOptions
     CacheProblems CACHE_PROBLEMS = CacheProblems::NO_CACHE;
 
     MasterFormulation MASTER_FORMULATION = MasterFormulation::INTEGER;
+    BendersAlgorithm ALGORITHM = BendersAlgorithm::SEQUENTIAL;
 
     std::string CSV_NAME = "benders_output_trace";
     std::string JSON_FILE = "out.json";

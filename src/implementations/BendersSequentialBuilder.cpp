@@ -10,6 +10,7 @@
 #include "utilities/logger/User.h"
 #include "utilities/logger/UserFile.h"
 #include "utilities/output/JsonWriter.h"
+#include "utilities/output/VoidWriter.h"
 
 namespace
 {
@@ -64,6 +65,42 @@ std::unique_ptr<BendersSequential> BuildBendersSequential(const BendersOptionsMa
                                                        logger,
                                                        BuildWriter(options),
                                                        BuildMathLogger(options));
+    benders->set_input_map(manager.Coupling());
+    return benders;
+}
+
+std::unique_ptr<BendersMpi> BuildBendersMpi(const BendersOptionsManager& manager,
+                                            mpi::communicator world)
+{
+    const auto& options = manager.Options();
+    const bool is_rank_0 = world.rank() == BendersMpi::RANK_0;
+
+    Logger logger;
+    std::shared_ptr<Output::OutputWriter> writer;
+    std::shared_ptr<MathLoggerDriver> math_logger;
+    if (is_rank_0)
+    {
+        std::filesystem::create_directories(options.OUTPUTROOT);
+        logger = BuildLogger(options);
+        for (const auto& warning: manager.Warnings())
+        {
+            logger->display_message(warning);
+        }
+        writer = BuildWriter(options);
+        math_logger = BuildMathLogger(options);
+    }
+    else
+    {
+        logger = std::make_shared<xpansion::logger::Master>();
+        writer = std::make_shared<Output::VoidWriter>();
+        math_logger = std::make_shared<MathLoggerDriver>();
+    }
+
+    auto benders = std::make_unique<BendersMpi>(options,
+                                                logger,
+                                                writer,
+                                                std::move(world),
+                                                math_logger);
     benders->set_input_map(manager.Coupling());
     return benders;
 }

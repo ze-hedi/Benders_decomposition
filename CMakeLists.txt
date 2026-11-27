@@ -93,6 +93,7 @@ endif()
 
 add_library(benders_builder src/implementations/BendersSequentialBuilder.cpp)
 target_link_libraries(benders_builder PUBLIC options implementations)
+target_link_libraries(benders_builder PUBLIC benders_mpi)
 
 add_executable(benders src/main.cpp)
 target_link_libraries(benders PRIVATE benders_builder)

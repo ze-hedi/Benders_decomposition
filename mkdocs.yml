@@ -22,6 +22,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Example: example.md
   - Options: options.md
   - Benders decomposition: benders-decomposition.md
 
